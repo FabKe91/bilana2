@@ -1,0 +1,12 @@
+integrator              = steep
+emtol                   = 1000.0
+nsteps                  = 5000
+nstlist 	= 0
+ns_type 	= grid	; simple also works, doesn't seem relevant
+rlist		= 0
+cutoff-scheme	= group
+vdwtype		= cutoff
+rvdw		= 0
+coulombtype	= cutoff
+rcoulomb	= 0
+pbc		= no
