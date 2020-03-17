@@ -1,0 +1,75 @@
+# This file was created Fri Mar 13 11:00:57 2020
+# Created by:
+#                      :-) GROMACS - gmx energy, 2018.6 (-:
+# 
+# Executable:   /home/f_kell07/software/gromacs-2018.6_comp/bin/gmx
+# Data prefix:  /home/f_kell07/software/gromacs-2018.6_comp
+# Working dir:  /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300
+# Command line:
+#   gmx energy -f ./energyfiles/edrfiles/energyfile_resid68_0.edr -s ./energyfiles/tprfiles/mdrerun_resid68_0.tpr -o ./energyfiles/xvgtables/energies_residue68_0.xvg
+# gmx energy is part of G R O M A C S:
+#
+# GRowing Old MAkes el Chrono Sweat
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kJ/mol)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Coul-SR:resid_68-resid_288"
+@ s1 legend "LJ-SR:resid_68-resid_288"
+@ s2 legend "Coul-SR:resid_68-resid_38"
+@ s3 legend "LJ-SR:resid_68-resid_38"
+@ s4 legend "Coul-SR:resid_68-resid_39"
+@ s5 legend "LJ-SR:resid_68-resid_39"
+@ s6 legend "Coul-SR:resid_68-resid_296"
+@ s7 legend "LJ-SR:resid_68-resid_296"
+@ s8 legend "Coul-SR:resid_68-resid_44"
+@ s9 legend "LJ-SR:resid_68-resid_44"
+@ s10 legend "Coul-SR:resid_68-resid_45"
+@ s11 legend "LJ-SR:resid_68-resid_45"
+@ s12 legend "Coul-SR:resid_68-resid_302"
+@ s13 legend "LJ-SR:resid_68-resid_302"
+@ s14 legend "Coul-SR:resid_68-resid_304"
+@ s15 legend "LJ-SR:resid_68-resid_304"
+@ s16 legend "Coul-SR:resid_68-resid_49"
+@ s17 legend "LJ-SR:resid_68-resid_49"
+@ s18 legend "Coul-SR:resid_68-resid_306"
+@ s19 legend "LJ-SR:resid_68-resid_306"
+@ s20 legend "Coul-SR:resid_68-resid_51"
+@ s21 legend "LJ-SR:resid_68-resid_51"
+@ s22 legend "Coul-SR:resid_68-resid_64"
+@ s23 legend "LJ-SR:resid_68-resid_64"
+@ s24 legend "Coul-SR:resid_68-resid_72"
+@ s25 legend "LJ-SR:resid_68-resid_72"
+@ s26 legend "Coul-SR:resid_68-resid_79"
+@ s27 legend "LJ-SR:resid_68-resid_79"
+@ s28 legend "Coul-SR:resid_68-resid_91"
+@ s29 legend "LJ-SR:resid_68-resid_91"
+@ s30 legend "Coul-SR:resid_68-resid_93"
+@ s31 legend "LJ-SR:resid_68-resid_93"
+@ s32 legend "Coul-SR:resid_68-resid_97"
+@ s33 legend "LJ-SR:resid_68-resid_97"
+@ s34 legend "Coul-SR:resid_68-resid_100"
+@ s35 legend "LJ-SR:resid_68-resid_100"
+@ s36 legend "Coul-SR:resid_68-resid_106"
+@ s37 legend "LJ-SR:resid_68-resid_106"
+@ s38 legend "Coul-SR:resid_68-resid_108"
+@ s39 legend "LJ-SR:resid_68-resid_108"
+@ s40 legend "Coul-SR:resid_68-resid_111"
+@ s41 legend "LJ-SR:resid_68-resid_111"
+@ s42 legend "Coul-SR:resid_68-resid_116"
+@ s43 legend "LJ-SR:resid_68-resid_116"
+@ s44 legend "Coul-SR:resid_68-solv"
+@ s45 legend "LJ-SR:resid_68-solv"
+    0.000000    0.000000    0.000000    7.142112   -0.964990    0.060836   -0.195404   -1.103917   -6.696575   -0.745577  -58.731895    0.199191   -0.021501    0.000000    0.000000    0.413620  -27.990396    0.000000    0.000000    0.000501   -0.000085    1.273122  -11.413885   14.921426   -3.601033    0.000000    0.000000    4.538141  -58.555424  -29.060644  -32.707565    0.075413   -0.084086  -48.561153  -39.613171    0.224847   -0.131802    0.047758   -0.144982    0.001280   -0.103821   -0.025958  -13.773258    0.000170   -0.000068  -328.499359  -28.061226
+ 1000.000000    0.000000    0.000000    0.167266   -0.528474    0.369102   -1.437104    0.580435   -1.631347  -26.310324  -87.137733    0.001583   -0.000619    0.000000    0.000000    1.007854  -25.279606    0.000000    0.000000    0.000445   -0.000060    0.272195  -27.705721   -2.921156  -20.280083    0.000000    0.000000    7.032635  -31.854391   -1.445530  -26.682837    0.153125   -1.485803  -83.491814  -25.477921   -0.109016   -0.028997   -0.059184   -0.112984    0.102399   -0.530660   -0.197381   -3.667218    0.000000    0.000000  -420.396484  -23.970081
+ 2000.000000    0.000000    0.000000    4.788434   -1.765482    0.102272   -0.415277    0.722616   -4.022895   10.173281  -100.435509   -0.015647   -0.013184    0.000000    0.000000    0.281005   -4.819737    0.000000    0.000000    0.000865   -0.000599    0.401347   -5.110770  -28.754066  -14.378648    0.000000    0.000000  -47.911434  -59.299519    2.296297  -36.520718    0.130205   -0.506885  -19.122723  -54.471600    0.146615   -0.029289    0.109235   -0.474926    0.041708   -0.065721    0.416006   -5.096291    0.000046   -0.000003  -353.337830  -47.979565
+ 3000.000000    0.000000    0.000000    1.876286   -0.999358    0.240349   -7.063775    0.654406   -3.170912   10.701084  -70.259438   -0.332806   -0.087623    0.000000    0.000000    0.107557   -0.249341    0.000000    0.000000    0.005255   -0.008213    0.428360  -12.617435  -76.237671  -16.753046    0.000000    0.000000  -21.499779  -32.708668  -15.618134  -23.925865   -0.006678   -0.096898    5.502614  -29.200714    0.219051   -0.036646    1.941342  -14.295463    0.974216   -0.116132    1.196190  -12.031335    0.000000    0.000000  -334.429565  -22.742159
+ 4000.000000    0.000022   -0.000001    1.660821   -7.902438    0.069732   -0.249169    0.582950   -5.558593   -9.914309  -91.917145    0.061028   -0.107805    0.000000    0.000000    0.157971   -0.520726    0.000000    0.000000    0.000558   -0.000107    0.164079   -0.600013  -80.034996   -9.065560    0.000000    0.000000  -61.959393  -33.998470  -20.788921  -38.417770    0.002845   -0.004913  -50.099964  -50.604282    0.344248   -0.073220    0.200845   -2.907456    0.600061   -3.456592    3.591898  -25.705833   -0.001184   -0.000217  -232.343597  -38.589962
+ 5000.000000    0.000188   -0.000072    0.213709   -2.875373    0.120491   -0.414159   -0.997752  -16.058294  -63.034744  -103.743660    0.073895   -0.049789    0.000000    0.000000    0.222519   -0.714599    0.000000    0.000000    0.000029   -0.000001    0.264858   -0.881985   14.178768   -5.344108   -0.037178   -0.011360   -1.804012  -30.147385    0.186114  -23.211552    0.003144   -0.005457  -47.898769  -31.680424   -0.397934   -0.091486    0.129357   -9.663949   -0.000994   -0.007293   -1.822410  -51.994488    0.000066   -0.000023  -375.323608  -59.149818

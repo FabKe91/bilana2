@@ -1,0 +1,33 @@
+# This file was created Mon Mar 16 17:15:58 2020
+# Created by:
+#                      :-) GROMACS - gmx energy, 2018.6 (-:
+# 
+# Executable:   /home/f_kell07/software/gromacs-2018.6_comp/bin/gmx
+# Data prefix:  /home/f_kell07/software/gromacs-2018.6_comp
+# Working dir:  /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300
+# Command line:
+#   gmx energy -f ./energyfiles/edrfiles/energyfile_resid273_0.edr -s ./energyfiles/tprfiles/mdrerun_resid273_0.tpr -o ./energyfiles/xvgtables/energies_residue273_selfinteraction.xvg
+# gmx energy is part of G R O M A C S:
+#
+# Great Red Oystrich Makes All Chemists Sane
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kJ/mol)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Coul-SR:resid_273-resid_273"
+@ s1 legend "LJ-SR:resid_273-resid_273"
+@ s2 legend "Coul-14:resid_273-resid_273"
+@ s3 legend "LJ-14:resid_273-resid_273"
+    0.000000  284.585876  -39.958897  -505.286285   20.290604
+ 1000.000000  305.340912  -20.020235  -525.982300   35.231045
+ 2000.000000  293.035675  -46.787548  -504.532135   17.056746
+ 3000.000000  283.095459  -61.278214  -495.125946   26.389435
+ 4000.000000  248.300262  -42.289185  -464.133301   25.240810
+ 5000.000000  295.748444  -52.080643  -524.681641   23.619553

@@ -1,0 +1,79 @@
+# This file was created Fri Mar 13 10:58:46 2020
+# Created by:
+#                      :-) GROMACS - gmx energy, 2018.6 (-:
+# 
+# Executable:   /home/f_kell07/software/gromacs-2018.6_comp/bin/gmx
+# Data prefix:  /home/f_kell07/software/gromacs-2018.6_comp
+# Working dir:  /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300
+# Command line:
+#   gmx energy -f ./energyfiles/edrfiles/energyfile_resid59_0.edr -s ./energyfiles/tprfiles/mdrerun_resid59_0.tpr -o ./energyfiles/xvgtables/energies_residue59_0.xvg
+# gmx energy is part of G R O M A C S:
+#
+# God Rules Over Mankind, Animals, Cosmos and Such
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kJ/mol)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Coul-SR:resid_59-resid_23"
+@ s1 legend "LJ-SR:resid_59-resid_23"
+@ s2 legend "Coul-SR:resid_59-resid_284"
+@ s3 legend "LJ-SR:resid_59-resid_284"
+@ s4 legend "Coul-SR:resid_59-resid_29"
+@ s5 legend "LJ-SR:resid_59-resid_29"
+@ s6 legend "Coul-SR:resid_59-resid_32"
+@ s7 legend "LJ-SR:resid_59-resid_32"
+@ s8 legend "Coul-SR:resid_59-resid_33"
+@ s9 legend "LJ-SR:resid_59-resid_33"
+@ s10 legend "Coul-SR:resid_59-resid_292"
+@ s11 legend "LJ-SR:resid_59-resid_292"
+@ s12 legend "Coul-SR:resid_59-resid_295"
+@ s13 legend "LJ-SR:resid_59-resid_295"
+@ s14 legend "Coul-SR:resid_59-resid_42"
+@ s15 legend "LJ-SR:resid_59-resid_42"
+@ s16 legend "Coul-SR:resid_59-resid_300"
+@ s17 legend "LJ-SR:resid_59-resid_300"
+@ s18 legend "Coul-SR:resid_59-resid_302"
+@ s19 legend "LJ-SR:resid_59-resid_302"
+@ s20 legend "Coul-SR:resid_59-resid_49"
+@ s21 legend "LJ-SR:resid_59-resid_49"
+@ s22 legend "Coul-SR:resid_59-resid_50"
+@ s23 legend "LJ-SR:resid_59-resid_50"
+@ s24 legend "Coul-SR:resid_59-resid_52"
+@ s25 legend "LJ-SR:resid_59-resid_52"
+@ s26 legend "Coul-SR:resid_59-resid_54"
+@ s27 legend "LJ-SR:resid_59-resid_54"
+@ s28 legend "Coul-SR:resid_59-resid_311"
+@ s29 legend "LJ-SR:resid_59-resid_311"
+@ s30 legend "Coul-SR:resid_59-resid_69"
+@ s31 legend "LJ-SR:resid_59-resid_69"
+@ s32 legend "Coul-SR:resid_59-resid_76"
+@ s33 legend "LJ-SR:resid_59-resid_76"
+@ s34 legend "Coul-SR:resid_59-resid_77"
+@ s35 legend "LJ-SR:resid_59-resid_77"
+@ s36 legend "Coul-SR:resid_59-resid_80"
+@ s37 legend "LJ-SR:resid_59-resid_80"
+@ s38 legend "Coul-SR:resid_59-resid_87"
+@ s39 legend "LJ-SR:resid_59-resid_87"
+@ s40 legend "Coul-SR:resid_59-resid_98"
+@ s41 legend "LJ-SR:resid_59-resid_98"
+@ s42 legend "Coul-SR:resid_59-resid_100"
+@ s43 legend "LJ-SR:resid_59-resid_100"
+@ s44 legend "Coul-SR:resid_59-resid_109"
+@ s45 legend "LJ-SR:resid_59-resid_109"
+@ s46 legend "Coul-SR:resid_59-resid_126"
+@ s47 legend "LJ-SR:resid_59-resid_126"
+@ s48 legend "Coul-SR:resid_59-solv"
+@ s49 legend "LJ-SR:resid_59-solv"
+    0.000000    7.327705   -1.179599    0.000000    0.000000    0.000000    0.000000    0.128539   -0.591133   -3.629186  -19.654219   -0.000713   -0.001647    0.131163   -0.550789  -44.434254  -45.099194    0.484837   -1.687971    0.001116   -0.000986    0.000000    0.000000    0.000001   -0.000000    4.061835  -55.869728    0.008387   -0.022421    0.000000    0.000000    6.707798   -7.082151    0.000000    0.000000    6.064775  -28.219772    0.000754   -0.000459    0.063679  -32.939289    0.180328   -5.107983    0.000000    0.000000    0.501288   -0.742365    0.007696   -0.022171  -345.255280  -32.270298
+ 1000.000000    0.037479   -0.003122    0.000000    0.000000    0.000000    0.000000    0.044366   -0.205396    4.438679  -17.454269    0.000614   -0.000224    1.644096  -21.559843   -4.111914  -41.105049    0.104354   -0.285189    0.003677   -0.011472    0.000421   -0.000454    0.083981   -0.272722   -1.293403  -19.830694    0.001421   -0.001309    0.000000    0.000000   13.638252  -29.004530    0.064483   -0.228281    5.979850  -34.366997    0.000000    0.000000    0.992140  -58.460747   -0.264395   -0.678578    0.000000    0.000000   -0.331648   -1.704323   -0.000894   -0.000147  -465.755585   -2.162491
+ 2000.000000    0.000671   -0.003926    0.000000    0.000000    0.000350   -0.000585    0.375372   -1.587420  -32.017155  -18.916063    0.000175   -0.000515    0.799998  -26.311184  -13.607955  -49.392326    0.062484   -0.334513    0.030385   -0.077192    0.000000    0.000000    0.077314   -5.381894   -1.899287  -51.507870    0.053506   -0.160647    0.000000    0.000000  -45.492802  -13.255615    0.201577   -0.805114    0.834564  -46.017673    0.001766   -0.001469  -31.403532  -56.335335    0.667431   -0.877342    0.000000    0.000000   -0.033851   -0.759933    0.002272   -0.000802  -231.727402  -20.971756
+ 3000.000000    0.004103   -0.005527    0.000000    0.000000    0.000000    0.000000    0.393565   -1.846258   -4.015896   -5.733350    0.004565   -0.012983    1.088035  -19.757895  -47.654308  -56.815613    0.072866   -0.426930   -0.008581   -0.881563    0.000000    0.000000    0.006795   -0.000340    8.203892  -41.019901    0.067742   -0.209866    0.000000    0.000000  -28.266088  -33.316635   -0.798826   -0.240514  -59.536518  -66.657951    0.001716   -0.000758    1.830110  -27.686838   -0.042022   -0.432115    0.000000    0.000000    0.049633   -1.192978    0.000623   -0.000107  -352.481720  -28.927500
+ 4000.000000    0.000130   -0.000008    0.000000    0.000000    0.000000    0.000000    0.588725   -4.587047    0.588756   -1.129967    0.006791   -0.014098    1.465676  -22.585758   -0.725312  -45.904465    0.491507   -1.730897    0.160798   -1.337755    0.000000    0.000000    0.260028   -0.050624   -3.187788  -66.533623    0.063355   -0.259947    0.000000    0.000000   -3.721789  -54.931816   -2.772619   -2.430305    5.041515  -70.993027    0.001853   -0.001683   21.477375  -50.025364    0.223772   -1.076968    0.001646   -0.002887    0.283665   -1.152584    0.006643   -0.011637  -352.887848  -32.884621
+ 5000.000000    0.000014   -0.000001    0.000000    0.000000    0.001294   -0.000004    0.264341   -0.632989   -0.166922   -1.719478    0.000004   -0.000000    0.836671  -31.344788  -32.695358  -47.640156    0.237411   -0.842720    0.266624   -0.401710    0.000248   -0.000000    2.265299   -0.520303   -3.570359  -53.559326    0.073637   -0.237524    0.000000    0.000000  -25.053091  -42.534912  -34.857899  -15.513848  -88.941330  -89.938545    0.001207   -0.000615    8.949366  -35.720150    0.256056   -0.396571    0.000000    0.000000    0.325842   -1.333157    0.001298   -0.000547  -202.125076  -27.656340

@@ -1,0 +1,33 @@
+# This file was created Fri Mar 13 10:47:05 2020
+# Created by:
+#                      :-) GROMACS - gmx energy, 2018.6 (-:
+# 
+# Executable:   /home/f_kell07/software/gromacs-2018.6_comp/bin/gmx
+# Data prefix:  /home/f_kell07/software/gromacs-2018.6_comp
+# Working dir:  /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300
+# Command line:
+#   gmx energy -f ./energyfiles/edrfiles/energyfile_resid11_0.edr -s ./energyfiles/tprfiles/mdrerun_resid11_0.tpr -o ./energyfiles/xvgtables/energies_residue11_selfinteraction.xvg
+# gmx energy is part of G R O M A C S:
+#
+# Great Red Owns Many ACres of Sand 
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kJ/mol)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Coul-SR:resid_11-resid_11"
+@ s1 legend "LJ-SR:resid_11-resid_11"
+@ s2 legend "Coul-14:resid_11-resid_11"
+@ s3 legend "LJ-14:resid_11-resid_11"
+    0.000000  307.615540  -55.699131  -555.155945   34.007561
+ 1000.000000  345.143066  -63.177727  -566.168457   28.854630
+ 2000.000000  326.449036  -52.314114  -540.871887   30.307148
+ 3000.000000  398.540375  -66.432808  -601.861572   20.688950
+ 4000.000000  238.795273  -65.504669  -445.647369   31.651375
+ 5000.000000  342.020905  -51.186108  -563.880432   28.268337

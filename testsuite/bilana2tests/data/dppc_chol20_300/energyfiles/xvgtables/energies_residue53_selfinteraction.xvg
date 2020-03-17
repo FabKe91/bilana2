@@ -1,0 +1,33 @@
+# This file was created Fri Mar 13 10:57:19 2020
+# Created by:
+#                      :-) GROMACS - gmx energy, 2018.6 (-:
+# 
+# Executable:   /home/f_kell07/software/gromacs-2018.6_comp/bin/gmx
+# Data prefix:  /home/f_kell07/software/gromacs-2018.6_comp
+# Working dir:  /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300
+# Command line:
+#   gmx energy -f ./energyfiles/edrfiles/energyfile_resid53_0.edr -s ./energyfiles/tprfiles/mdrerun_resid53_0.tpr -o ./energyfiles/xvgtables/energies_residue53_selfinteraction.xvg
+# gmx energy is part of G R O M A C S:
+#
+# Good ROcking Metal Altar for Chronical Sinners
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kJ/mol)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Coul-SR:resid_53-resid_53"
+@ s1 legend "LJ-SR:resid_53-resid_53"
+@ s2 legend "Coul-14:resid_53-resid_53"
+@ s3 legend "LJ-14:resid_53-resid_53"
+    0.000000  246.112076  -56.144821  -428.859924   18.637579
+ 1000.000000  250.936798  -55.430981  -454.125671   35.921776
+ 2000.000000  356.627716  -35.540447  -558.078247   35.353584
+ 3000.000000  284.547974  -47.066727  -484.837341   22.471470
+ 4000.000000  268.523682  -67.180923  -468.541626   30.964279
+ 5000.000000  287.923340  -61.511868  -504.217957   24.608084

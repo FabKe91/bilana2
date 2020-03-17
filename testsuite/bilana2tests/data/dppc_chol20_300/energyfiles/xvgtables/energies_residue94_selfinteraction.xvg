@@ -1,0 +1,33 @@
+# This file was created Fri Mar 13 11:07:32 2020
+# Created by:
+#                      :-) GROMACS - gmx energy, 2018.6 (-:
+# 
+# Executable:   /home/f_kell07/software/gromacs-2018.6_comp/bin/gmx
+# Data prefix:  /home/f_kell07/software/gromacs-2018.6_comp
+# Working dir:  /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300
+# Command line:
+#   gmx energy -f ./energyfiles/edrfiles/energyfile_resid94_0.edr -s ./energyfiles/tprfiles/mdrerun_resid94_0.tpr -o ./energyfiles/xvgtables/energies_residue94_selfinteraction.xvg
+# gmx energy is part of G R O M A C S:
+#
+# Giant Rising Ordinary Mutants for A Clerical Setup
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kJ/mol)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Coul-SR:resid_94-resid_94"
+@ s1 legend "LJ-SR:resid_94-resid_94"
+@ s2 legend "Coul-14:resid_94-resid_94"
+@ s3 legend "LJ-14:resid_94-resid_94"
+    0.000000  211.924469  -59.694504  -417.581390   23.995905
+ 1000.000000  314.814026  -56.328938  -513.316406   23.972052
+ 2000.000000  292.624237  -49.181778  -527.263000   21.867760
+ 3000.000000  290.965118  -60.343788  -516.015015   31.163254
+ 4000.000000  281.017914  -38.004910  -503.183319   25.311518
+ 5000.000000  295.599396  -65.041336  -477.856628   15.111536

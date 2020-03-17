@@ -1,0 +1,45 @@
+# This file was created Tue Mar 17 14:09:39 2020
+# Created by:
+#                      :-) GROMACS - gmx energy, 2018.6 (-:
+# 
+# Executable:   /home/f_kell07/software/gromacs-2018.6_comp/bin/gmx
+# Data prefix:  /home/f_kell07/software/gromacs-2018.6_comp
+# Working dir:  /home/f_kell07/software/Bilana2/testsuite
+# Command line:
+#   gmx energy -f /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300/energyfiles/edrfiles/energyfile_resid1_0.edr -s /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300/energyfiles/tprfiles/mdrerun_resid1_0.tpr -o /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300/energyfiles/xvgtables/energies_residue1_0.xvg
+# gmx energy is part of G R O M A C S:
+#
+# GROningen MAchine for Chemical Simulation
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kJ/mol)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Coul-SR:resid_1-resid_2"
+@ s1 legend "LJ-SR:resid_1-resid_2"
+@ s2 legend "Coul-SR:resid_1-resid_3"
+@ s3 legend "LJ-SR:resid_1-resid_3"
+@ s4 legend "Coul-SR:resid_1-resid_4"
+@ s5 legend "LJ-SR:resid_1-resid_4"
+@ s6 legend "Coul-SR:resid_1-resid_5"
+@ s7 legend "LJ-SR:resid_1-resid_5"
+@ s8 legend "Coul-SR:resid_1-resid_6"
+@ s9 legend "LJ-SR:resid_1-resid_6"
+@ s10 legend "Coul-SR:resid_1-resid_7"
+@ s11 legend "LJ-SR:resid_1-resid_7"
+@ s12 legend "Coul-SR:resid_1-resid_8"
+@ s13 legend "LJ-SR:resid_1-resid_8"
+@ s14 legend "Coul-SR:resid_1-solv"
+@ s15 legend "LJ-SR:resid_1-solv"
+    0.000000  -75.354492  -57.834518  -74.759888  -62.011478   -1.018835  -29.206591  -70.115868  -41.298767    3.856225  -40.737133  -13.640860  -13.779153   -4.114661  -13.455473  -199.261353    2.889486
+ 1000.000000  -48.226074  -73.081825   -5.827494  -46.979710    0.540161  -22.160202    3.427101  -28.348745   -4.717631  -57.213253   -2.891717  -28.016542    1.223006   -3.549954  -435.858337   -0.377268
+ 2000.000000  -56.867931  -72.104340  -15.399586  -71.297401    5.244048  -32.906860    2.541905  -41.691345   -3.200129  -56.090393    6.287446  -37.342026  -18.531363   -3.401803  -412.994263  -27.514652
+ 3000.000000  -57.190628  -64.471008  -60.370682  -63.231636    5.094108  -32.328518  -21.894737  -35.618431  -51.558788  -65.354935    2.723181  -39.155361   -0.175793   -1.391490  -208.587753  -30.432362
+ 4000.000000  -12.809157  -81.851738  -29.169142  -67.066216   -3.194453  -29.879333  -78.795822  -51.531891  -59.303627  -68.168701    8.915358  -23.603937   -0.257934   -2.237449  -271.348145  -15.017635
+ 5000.000000  -23.740202  -74.620476  -40.433533  -52.389015    1.768573  -26.870239  -48.029408  -45.621048  -22.437126  -105.337502   -0.468957  -30.052578   -0.552895   -0.438759  -352.407166  -14.175144

@@ -1,0 +1,33 @@
+# This file was created Mon Mar 16 17:16:51 2020
+# Created by:
+#                      :-) GROMACS - gmx energy, 2018.6 (-:
+# 
+# Executable:   /home/f_kell07/software/gromacs-2018.6_comp/bin/gmx
+# Data prefix:  /home/f_kell07/software/gromacs-2018.6_comp
+# Working dir:  /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300
+# Command line:
+#   gmx energy -f ./energyfiles/edrfiles/energyfile_resid316_0.edr -s ./energyfiles/tprfiles/mdrerun_resid316_0.tpr -o ./energyfiles/xvgtables/energies_residue316_selfinteraction.xvg
+# gmx energy is part of G R O M A C S:
+#
+# Gyas ROwers Mature At Cryogenic Speed
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kJ/mol)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Coul-SR:resid_316-resid_316"
+@ s1 legend "LJ-SR:resid_316-resid_316"
+@ s2 legend "Coul-14:resid_316-resid_316"
+@ s3 legend "LJ-14:resid_316-resid_316"
+    0.000000  -84.322510  -15.109896  -164.218277   36.171223
+ 1000.000000  -71.012604  -14.388279  -190.180527   33.704578
+ 2000.000000  -77.686829   -4.166883  -176.867966   32.467342
+ 3000.000000  -84.407166   -0.142581  -170.253967   40.644272
+ 4000.000000  -81.369232   -9.871801  -174.862549   30.692381
+ 5000.000000  -84.850250   -9.746654  -165.509735   37.731464

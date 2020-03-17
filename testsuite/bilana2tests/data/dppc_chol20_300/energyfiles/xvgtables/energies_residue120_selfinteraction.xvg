@@ -1,0 +1,33 @@
+# This file was created Fri Mar 13 11:13:42 2020
+# Created by:
+#                      :-) GROMACS - gmx energy, 2018.6 (-:
+# 
+# Executable:   /home/f_kell07/software/gromacs-2018.6_comp/bin/gmx
+# Data prefix:  /home/f_kell07/software/gromacs-2018.6_comp
+# Working dir:  /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300
+# Command line:
+#   gmx energy -f ./energyfiles/edrfiles/energyfile_resid120_0.edr -s ./energyfiles/tprfiles/mdrerun_resid120_0.tpr -o ./energyfiles/xvgtables/energies_residue120_selfinteraction.xvg
+# gmx energy is part of G R O M A C S:
+#
+# Green Red Orange Magenta Azure Cyan Skyblue
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kJ/mol)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Coul-SR:resid_120-resid_120"
+@ s1 legend "LJ-SR:resid_120-resid_120"
+@ s2 legend "Coul-14:resid_120-resid_120"
+@ s3 legend "LJ-14:resid_120-resid_120"
+    0.000000  233.081604  -30.403381  -434.844849   26.677954
+ 1000.000000  293.955200  -63.196480  -481.866547   35.845955
+ 2000.000000  294.796204  -38.415070  -490.304047   20.306446
+ 3000.000000  263.256897  -24.217499  -484.838837   26.152971
+ 4000.000000  289.650909  -35.447582  -516.954163   33.690201
+ 5000.000000  273.706146  -32.650665  -486.254913   18.649128

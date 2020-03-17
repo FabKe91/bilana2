@@ -1,0 +1,33 @@
+# This file was created Mon Mar 16 17:17:19 2020
+# Created by:
+#                      :-) GROMACS - gmx energy, 2018.6 (-:
+# 
+# Executable:   /home/f_kell07/software/gromacs-2018.6_comp/bin/gmx
+# Data prefix:  /home/f_kell07/software/gromacs-2018.6_comp
+# Working dir:  /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300
+# Command line:
+#   gmx energy -f ./energyfiles/edrfiles/energyfile_resid308_0.edr -s ./energyfiles/tprfiles/mdrerun_resid308_0.tpr -o ./energyfiles/xvgtables/energies_residue308_selfinteraction.xvg
+# gmx energy is part of G R O M A C S:
+#
+# Gravel Rubs Often Many Awfully Cauterized Sores
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kJ/mol)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Coul-SR:resid_308-resid_308"
+@ s1 legend "LJ-SR:resid_308-resid_308"
+@ s2 legend "Coul-14:resid_308-resid_308"
+@ s3 legend "LJ-14:resid_308-resid_308"
+    0.000000  -78.381073   -2.487967  -175.987976   33.599873
+ 1000.000000  -81.370712  -14.481281  -173.079010   29.199789
+ 2000.000000  -90.792297    3.688279  -159.955170   28.537470
+ 3000.000000  -94.803986  -10.170857  -157.446686   33.247234
+ 4000.000000  -74.188629   -1.533647  -183.218140   41.077637
+ 5000.000000  -84.170654   -0.241556  -166.057449   26.144587

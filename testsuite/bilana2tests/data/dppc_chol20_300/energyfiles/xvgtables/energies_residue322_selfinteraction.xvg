@@ -1,0 +1,33 @@
+# This file was created Mon Mar 16 17:17:22 2020
+# Created by:
+#                      :-) GROMACS - gmx energy, 2018.6 (-:
+# 
+# Executable:   /home/f_kell07/software/gromacs-2018.6_comp/bin/gmx
+# Data prefix:  /home/f_kell07/software/gromacs-2018.6_comp
+# Working dir:  /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300
+# Command line:
+#   gmx energy -f ./energyfiles/edrfiles/energyfile_resid322_0.edr -s ./energyfiles/tprfiles/mdrerun_resid322_0.tpr -o ./energyfiles/xvgtables/energies_residue322_selfinteraction.xvg
+# gmx energy is part of G R O M A C S:
+#
+# Guyana Rwanda Oman Macau Angola Cameroon Senegal
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kJ/mol)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Coul-SR:resid_322-resid_322"
+@ s1 legend "LJ-SR:resid_322-resid_322"
+@ s2 legend "Coul-14:resid_322-resid_322"
+@ s3 legend "LJ-14:resid_322-resid_322"
+    0.000000  -70.358147   -6.570951  -187.909393   34.418247
+ 1000.000000  -72.311874   -4.475905  -181.856445   31.047424
+ 2000.000000  -98.897713   -8.566171  -151.556549   33.555447
+ 3000.000000  -77.357483    6.717245  -179.507736   29.106659
+ 4000.000000  -89.822105   -2.164346  -162.337952   31.303272
+ 5000.000000  -79.639877   -7.184942  -172.630814   29.997374

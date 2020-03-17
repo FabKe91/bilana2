@@ -1,0 +1,33 @@
+# This file was created Fri Mar 13 10:59:28 2020
+# Created by:
+#                      :-) GROMACS - gmx energy, 2018.6 (-:
+# 
+# Executable:   /home/f_kell07/software/gromacs-2018.6_comp/bin/gmx
+# Data prefix:  /home/f_kell07/software/gromacs-2018.6_comp
+# Working dir:  /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300
+# Command line:
+#   gmx energy -f ./energyfiles/edrfiles/energyfile_resid62_0.edr -s ./energyfiles/tprfiles/mdrerun_resid62_0.tpr -o ./energyfiles/xvgtables/energies_residue62_selfinteraction.xvg
+# gmx energy is part of G R O M A C S:
+#
+# Glycine aRginine prOline Methionine Alanine Cystine Serine
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kJ/mol)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Coul-SR:resid_62-resid_62"
+@ s1 legend "LJ-SR:resid_62-resid_62"
+@ s2 legend "Coul-14:resid_62-resid_62"
+@ s3 legend "LJ-14:resid_62-resid_62"
+    0.000000  284.360229  -58.812790  -499.231323   19.828028
+ 1000.000000  281.606995  -47.101833  -500.606445   21.876116
+ 2000.000000  322.696930  -48.960163  -519.141235   22.903078
+ 3000.000000  308.990448  -48.629280  -519.933350   26.126604
+ 4000.000000  319.346588  -51.155792  -527.405151   24.440096
+ 5000.000000  245.580261  -61.036232  -432.211121   33.806156

@@ -1,0 +1,73 @@
+# This file was created Fri Mar 13 10:57:35 2020
+# Created by:
+#                      :-) GROMACS - gmx energy, 2018.6 (-:
+# 
+# Executable:   /home/f_kell07/software/gromacs-2018.6_comp/bin/gmx
+# Data prefix:  /home/f_kell07/software/gromacs-2018.6_comp
+# Working dir:  /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/dppc_chol20_300
+# Command line:
+#   gmx energy -f ./energyfiles/edrfiles/energyfile_resid54_0.edr -s ./energyfiles/tprfiles/mdrerun_resid54_0.tpr -o ./energyfiles/xvgtables/energies_residue54_0.xvg
+# gmx energy is part of G R O M A C S:
+#
+# GRoups of Organic Molecules in ACtion for Science
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kJ/mol)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Coul-SR:resid_54-resid_20"
+@ s1 legend "LJ-SR:resid_54-resid_20"
+@ s2 legend "Coul-SR:resid_54-resid_285"
+@ s3 legend "LJ-SR:resid_54-resid_285"
+@ s4 legend "Coul-SR:resid_54-resid_32"
+@ s5 legend "LJ-SR:resid_54-resid_32"
+@ s6 legend "Coul-SR:resid_54-resid_33"
+@ s7 legend "LJ-SR:resid_54-resid_33"
+@ s8 legend "Coul-SR:resid_54-resid_35"
+@ s9 legend "LJ-SR:resid_54-resid_35"
+@ s10 legend "Coul-SR:resid_54-resid_295"
+@ s11 legend "LJ-SR:resid_54-resid_295"
+@ s12 legend "Coul-SR:resid_54-resid_42"
+@ s13 legend "LJ-SR:resid_54-resid_42"
+@ s14 legend "Coul-SR:resid_54-resid_300"
+@ s15 legend "LJ-SR:resid_54-resid_300"
+@ s16 legend "Coul-SR:resid_54-resid_46"
+@ s17 legend "LJ-SR:resid_54-resid_46"
+@ s18 legend "Coul-SR:resid_54-resid_52"
+@ s19 legend "LJ-SR:resid_54-resid_52"
+@ s20 legend "Coul-SR:resid_54-resid_311"
+@ s21 legend "LJ-SR:resid_54-resid_311"
+@ s22 legend "Coul-SR:resid_54-resid_312"
+@ s23 legend "LJ-SR:resid_54-resid_312"
+@ s24 legend "Coul-SR:resid_54-resid_59"
+@ s25 legend "LJ-SR:resid_54-resid_59"
+@ s26 legend "Coul-SR:resid_54-resid_62"
+@ s27 legend "LJ-SR:resid_54-resid_62"
+@ s28 legend "Coul-SR:resid_54-resid_77"
+@ s29 legend "LJ-SR:resid_54-resid_77"
+@ s30 legend "Coul-SR:resid_54-resid_80"
+@ s31 legend "LJ-SR:resid_54-resid_80"
+@ s32 legend "Coul-SR:resid_54-resid_87"
+@ s33 legend "LJ-SR:resid_54-resid_87"
+@ s34 legend "Coul-SR:resid_54-resid_101"
+@ s35 legend "LJ-SR:resid_54-resid_101"
+@ s36 legend "Coul-SR:resid_54-resid_105"
+@ s37 legend "LJ-SR:resid_54-resid_105"
+@ s38 legend "Coul-SR:resid_54-resid_109"
+@ s39 legend "LJ-SR:resid_54-resid_109"
+@ s40 legend "Coul-SR:resid_54-resid_110"
+@ s41 legend "LJ-SR:resid_54-resid_110"
+@ s42 legend "Coul-SR:resid_54-solv"
+@ s43 legend "LJ-SR:resid_54-solv"
+    0.000000    0.427822  -15.749643    0.084321   -0.266787  -85.719429  -55.617683    0.107665   -0.480876   30.497889  -44.789028    0.000000    0.000000    0.018419   -0.058848    1.490335  -13.098211    3.784181   -0.760904  -16.647539  -46.579277    0.000000    0.000000    0.000000    0.000000    0.008387   -0.022421   15.247117  -30.678598   -0.009357   -0.288481   11.784222  -46.218727    0.000000    0.000000    0.024792   -0.039611   -1.064611   -0.372753    0.000021   -0.000001    0.066844   -0.208381  -368.863525   -4.866250
+ 1000.000000   -0.578489   -1.084625    0.088851   -0.233979    1.490623  -68.008545    0.042442   -0.177045   -7.159173  -34.768902    0.000000    0.000000    0.000021   -0.000001    0.862412  -32.572922    6.198427   -1.554183    0.173299  -32.275547    0.000000    0.000000    0.017236   -0.075173    0.001421   -0.001309   -3.271554  -26.328426   -0.711093   -1.570611  -66.840729  -76.604477    0.000010   -0.000000    1.127565   -6.319145   -0.572694  -16.237484    0.005896   -0.030328    0.160415   -0.712706  -403.817383   -4.184004
+ 2000.000000    0.555257  -12.625863    0.120621   -0.382191   10.320006  -77.556290    0.027694   -0.366833    1.041461  -31.559288    0.000000    0.000000    0.000704   -0.000384    1.181492  -19.492268    0.239941   -0.532368  -27.716373  -37.833778    0.000000    0.000000    0.000017   -0.000001    0.053506   -0.160647   -2.116295  -35.199120    4.991199   -7.001662  -41.081272  -105.527641    0.001063   -0.000131    0.114156   -0.220863    1.333910  -13.486926    0.028558   -0.081367    0.732810   -0.741281  -428.673248  -30.052298
+ 3000.000000    0.250850  -15.157808    0.071073   -0.254306   24.700830  -99.075317   -0.651692   -0.428783   -4.836002  -42.709557    0.000000    0.000000    0.001655   -0.002532    1.408435  -18.912817    0.046008   -0.445104  -35.007324  -49.284447    0.000000    0.000000    0.000012   -0.000000    0.067742   -0.209866    1.281396  -25.227697   -0.366475   -0.980072  -80.298218  -101.706543    0.000055   -0.000000    0.751449   -1.683568    6.082454  -25.656439    0.037359   -0.079167    0.108125   -0.390339  -329.570953  -36.276001
+ 4000.000000    0.239657  -26.470379    0.065498   -0.219280   15.138968  -104.286423    0.064184   -0.435465   -6.173715  -34.391029    0.000000    0.000000    0.000970   -0.000383    0.123692  -17.670265    0.061343   -0.324647   -8.293117   -8.855373    0.000000    0.000000    0.000092   -0.000009    0.063355   -0.259947   -3.027274  -33.255970   -0.390861   -0.455041  -51.604515  -99.498535   -0.000237   -0.000003    3.120683   -2.614219   -1.805490  -32.495647    0.038831   -0.116409    0.047499   -0.220646  -422.145782  -24.271791
+ 5000.000000    0.163629   -0.804374    0.000747   -0.000599   12.745733  -58.930386   -0.036326   -0.090960    5.008512  -48.462532    0.000000    0.000000    0.004958   -0.008503    1.683481  -27.726259    0.089701   -9.509710  -57.761395  -37.308998    0.000000    0.000000    0.000017   -0.000001    0.073637   -0.237524    3.032933  -32.601311    0.202676   -1.087019  -20.706768  -78.620712    0.000000    0.000000   -0.183443   -1.876339    0.821641  -19.546890    0.033460   -0.118600    0.002205   -0.002308  -409.372314  -66.926445

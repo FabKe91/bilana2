@@ -1,0 +1,13 @@
+#system info
+system: dppc_chol20
+lipidmolecules: DPPC,CHL1
+temperature: 300
+timeframe: 0,900000000,1000
+
+cutoff: 1.0
+forcefield: charmm
+
+refatomselection: (resname DPPC DUPC and name P) or (resname CHL1 and name O3) or (resname CHIM and name C20)
+
+# absolute path to mdfiles
+mdfiles: /home/f_kell07/software/Bilana2/testsuite/bilana2tests/data/mdfiles_test
