@@ -2,5 +2,5 @@ eggs/
 .eggs/
 *.egg-info
 *.egg
-bilana2.egg-info
+*.egg-info
 **__pycache__

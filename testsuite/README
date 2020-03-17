@@ -1,0 +1,74 @@
+This testsuite tests functionality of bilana2 package, relying on the pytest module
+
+
+#================================#
+#          Basic usage           #
+#================================#
+
+Run in .bilana2/testsuite:
+
+python -m bilana2tests -n ncpu
+
+From python code:
+
+>>> import bilana2tests
+>>> bilana2tests.run()
+
+
+#================================#
+#   Running pytest in parallel   #
+#================================#
+
+To run the tests in parallel install pytest-xdist with
+$ pip install pytest-xdist
+and then run the testsuite using
+$pytest -n NCPU
+
+
+#================================#
+# Some useful notes to pytest    #
+#================================#
+
+>>> import pytest
+>>>
+>>> # =========================================
+>>> #           Fixture objects
+>>> # =========================================
+>>>
+>>> @pytest.fixture # Decorator that defines a function as fixture, acting as a datasource
+>>> def supply_with_var():
+>>>     var = 42
+>>> return var
+>>>
+>>> # supply_with_var can now be used as data
+>>> def test_var(supply_with_var):
+>>>     other_var = 0
+>>>     assert supply_with_var == other_var, "not the answer"
+>>>
+>>> # =========================================
+>>> #          Expected exceptions
+>>> # =========================================
+>>>
+>>> with pytest.raises(ErrType): # Expecting a specific error that is raised
+>>>     do()
+>>>
+>>>
+>>> # =========================================
+>>> #          Parametrized tests
+>>> # =========================================
+>>> @pytest.mark.parametrize("input1, input2, output",[(5,5,10),(3,5,12)])
+>>> def test_add(input1, input2, output):
+>>>     assert input1+input2 == output,"failed"
+>>>
+>>>
+>>>
+>>> # =========================================
+>>> #               Skip tests
+>>> # =========================================
+>>> @pytest.mark.skip
+>>> def test_unused(): # Won't be tested
+>>>     assert 0 == 0
+>>>
+>>> @pytest.mark.xfail
+>>> def test_unused(): # Won't raise
+>>>     assert 0 == 1
