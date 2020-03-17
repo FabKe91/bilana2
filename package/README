@@ -1,0 +1,9 @@
+=======================
+    Bilana2 README
+=======================
+
+Bilana2 is a package that aids in analysing Gromacs MD simulations of lipid bilayers.
+This package heavily relies on the MDAnalysis package, see https://www.mdanalysis.org
+for further information.
+
+For basic usage and preparation notes see doc/usage

@@ -1,0 +1,10 @@
+#System info
+System: dppc_chol20
+Lipidmolecules: DPPC,CHOL
+Temperature: 290
+Timeframe: 0,1000000,1000
+cutoff: 1.0
+refatomselection: "(resname DPPC and name P) or (resname CHOL and name O)"
+
+# absolute path to mdfiles
+mdfiles: /scratch/f_kell07/mdfiles

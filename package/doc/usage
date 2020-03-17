@@ -1,0 +1,72 @@
+Preparation:
+
+Following parameters must be given in the input file:
+
+        #system info
+        system: dppc_chol20
+        lipidmolecules: DPPC,CHL1
+        temperature: 290
+        timeframe: 0,900000000,1000
+
+        cutoff: 1.0
+        forcefield: charmm36
+
+        refatomselection: (resname DPPC DUPC and name P) or (resname CHL1 and name O3) or (resname CHIM and name C20)
+
+        # absolute path to mdfiles
+        mdfiles: /scratch/f_kell07/mdfiles
+
+The mdfiles path stores all required Gromacs MD files in the following manner:
+
+    Files must be stored in the mdfiles folder given in the inputfile in the following manner:
+        mdfiles/
+            |--md_trj/*_*_whole.xtc
+            |--tpr/*_*.tpr
+            |--initial_coords/*.gro
+            |--psf/*.top
+
+    NOTES:
+        - MD trajectories must be made whole and in .xtc format.
+        - The asterisks indicate the basename of a bilayer simulation (e.g. dppc_chol20), while
+          two asterisks indicate the basename in combination with the simulation temperature
+          (e.g. dppc_chol20_300)
+
+
+Example usage:
+
+>>> import bilana2 as bl
+>>>
+>>> ### Main object of bilana2, reading the file inputfile as input
+>>>
+>>> sysinfo = bl.Systeminfo(inputfilename="inputfile")
+>>>
+>>> ### determine the lipid neighbors
+>>>
+>>> bl.neighbor.write_neighbor_info(sysinfo)
+>>> neighbor_map = bl.neighbor.get_neighbor_dict(neighborfilename='neighbor_info')
+>>>
+>>> ### Calculate order parameter for system using tilt correction
+>>>
+>>> bl.order.calc_tilt(sysinfo, filename="tilt.csv")
+>>> bl.order.create_cc_orderfiles(sysinfo, neighbor_map, with_tilt_correction='tilt.csv')
+>>>
+>>> ### Get index file for the energy calculation
+>>>
+>>> bl.energy.create_indexfile(sysinfo, resindex_filename="resindex_all.ndx")
+>>>
+>>> ### Calculate the interaction energies of all lipids (not distinguishing between head and tail)
+>>>
+>>> energy_inst = bl.Energy("complete", neighbor_map, inputfilename="inputfile", resindex_all='resindex_all')
+>>>
+>>> # calculation for all lipid resids in the system - should be split to multiple jobs
+>>> energy_inst.run_calculation(resids=sysinfo.lipid_resids)
+>>>
+>>> energy_inst.run_lip_leaflet_interaction(resids=sysinfo.lipid_resids)
+>>>
+>>> ### Put all energies calculated together
+>>>
+>>> bl.energy.write_energyfile(energy_inst)
+>>> bl.energy.write_selfinteractionfile(energy_inst)
+>>> bl.energy.create_lipid_water_interaction_file(energy_inst, outputfilename="water_interaction.dat")
+>>> bl.energy.create_lipid_leaflet_interaction_file(energy_inst, outputfilename="water_interaction.dat")
+>>>
