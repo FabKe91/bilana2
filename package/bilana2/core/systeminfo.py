@@ -102,13 +102,17 @@ class Systeminfo(object):
         self.solvent_resnames = [mol for mol in np.unique(self.universe.atoms.resnames) if mol not in self.molecules]
         self.water_resname    = [mol for mol in np.unique(self.universe.atoms.resnames) if self.ff.is_water(mol)][0]
 
-        self.pl_resnames      = [mol for mol in self.molecules if not ( self.ff.is_protein(mol) or self.ff.is_sterol(mol) ) ]
+        self.pl_resnames      = [ mol for mol in np.unique(self.universe.residues.resnames) if \
+                    ( (mol in self.molecules) and not ( self.ff.is_protein(mol) or self.ff.is_sterol(mol) ) ) ]
         self.pl_resids        = np.unique(self.universe.atoms.select_atoms( 'resname {}'.format( ' '.join( self.pl_resnames ) ) ).resids)
 
-        self.sterol_resnames  = [mol for mol in self.molecules if self.ff.is_sterol(mol) ]
+        self.sterol_resnames  = [ mol for mol in np.unique(self.universe.residues.resnames) if \
+                    ( (mol in self.molecules) and self.ff.is_sterol(mol) ) ]
         self.sterol_resids    = []
 
         self.protein_sequence = [mol for mol in self.molecules if self.ff.is_protein(mol) ]
+        self.protein_resnames  = [ mol for mol in np.unique(self.universe.residues.resnames) if \
+                    ( (mol in self.molecules) and self.ff.is_protein(mol) ) ]
         self.protein_resnames = []
         self.protein_resids   = []
 
@@ -117,8 +121,17 @@ class Systeminfo(object):
         if self.protein_sequence:
             self._add_protein_resids_and_resnames()
 
+        self._check_if_all_molecules_found()
+
     def within_timerange(self, time):
         return (self.t_start <= time <= self.t_end) and (time % self.dt == 0)
+
+    def _check_if_all_molecules_found(self):
+        found_lipids = self.pl_resnames + self.sterol_resnames + self.protein_resnames
+        not_found    = list(set(self.molecules) - set(found_lipids))
+        if not_found:
+            raise ValueError("Not all lipids given in inputfile found in structure file! Incorrect name?\n"\
+                    "Lipid(s) not found: {}".format(' '.join(not_found) ) )
 
     def _add_sterol_resids(self):
         self.sterol_resids += list(np.unique(self.universe.atoms.select_atoms(
