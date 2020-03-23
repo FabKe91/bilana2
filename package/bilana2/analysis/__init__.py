@@ -1,1 +1,1 @@
-from .gromacs_analysis import calc_density
+from .gromacs_analysis import calc_density, calc_rdf

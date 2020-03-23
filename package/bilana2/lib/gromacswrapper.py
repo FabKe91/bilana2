@@ -91,13 +91,13 @@ def exec_gromacs(gmx, gmxlib, inpargs, interactive=None):
 
 def write_log(name_specifier, stdout, stderr, path="."):
     ''' Writes a logfile for gromacs output '''
-    dt_str   = datetime.now().strftime("%y.%m.%d-H%HM%MS%S")
+    dt_str = datetime.now().strftime("%y.%m.%d-H%HM%MS%S")
     job_id = os.environ.get("SLURM_JOB_ID", None)
 
     if job_id is None:
         fname = "{}_{}.log".format(name_specifier, dt_str)
     else:
-        fname = "slurmid{}_{}_{}.log".format(name_specifier, dt_str, job_id)
+        fname = "slurmid{}_{}_{}.log".format(job_id, name_specifier, dt_str)
     with open(path + "/" + fname, "w") as flog:
         if job_id is not None:
             jname = os.environ["SLURM_JOB_NAME"]

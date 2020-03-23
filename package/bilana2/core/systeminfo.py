@@ -229,10 +229,13 @@ class Conv(object):
         Stores all conversion dicts
     """
     def __init__(self, universe: mda.Universe, ff: Forcefield, molecules: list):
-        self.index_to_resid   = np.array([0, *universe.atoms.resids])
-        self.resid_to_resname = self._get_resid_to_resname(universe)
-        self.resid_to_leaflet = self._leaflet_assignment_of_frame(
+        self.index_to_resid    = np.array([0, *universe.atoms.resids])
+        self.resid_to_resname  = self._get_resid_to_resname(universe)
+        self.resid_to_leaflet  = self._leaflet_assignment_of_frame(
                                     universe, ff, molecules)
+        self.leaflet_to_resids = [[], []]
+        for key, val in self.resid_to_leaflet.items():
+            self.leaflet_to_resids[val].append(key)
 
     def _get_resid_to_resname(self, u: mda.Universe) -> dict:
         ''' Create a dictionary that maps all resids to the respective molecules resname '''
