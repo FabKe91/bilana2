@@ -15,6 +15,7 @@ def calc_density(systeminfo, selstr, outname="density.xvg", overwrite=False, **k
             NOTE: Additional flags can be set adding with kw_den like b=3 converted to -b 3
     '''
     ### Setting all paths needed ####
+    systeminfo.path.create_folders()
     os.makedirs(systeminfo.path.data + "/densities", exist_ok=True)
     TRJ = systeminfo.path.trj
     TPR = systeminfo.path.tpr

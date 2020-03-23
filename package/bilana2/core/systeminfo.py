@@ -290,21 +290,23 @@ class Files(object):
     """
 
     def __init__(self, inputfilepath, mdfilespath, system, temperature):
-        self._inputfilepath = inputfilepath
+        inpdir = os.path.dirname(inputfilepath)
+        if not inpdir:
+            inpdir = '.'
 
         self.mdfiles = mdfilespath
+
         self.trj    = '{}/md_trj/{}_{}_whole.xtc'.format(mdfilespath, system, temperature)
         self.gro    = '{}/initial_coords/{}.gro'.format(mdfilespath, system)
         self.top    = '{}/psf/{}.top'.format(mdfilespath, system)
         self.tpr    = '{}/tpr/{}_{}.tpr'.format(mdfilespath, system, temperature)
         self.edr    = '{}/enr/{}_{}.edr'.format(mdfilespath, system, temperature)
 
-        # Can be set using self.create_folders()
-        self.index  = None
-        self.data   = None
-        self.tmp    = None
-        self.energy = None
-        self.log    = None
+        self.index  = "{}/indexfiles".format(inpdir)
+        self.data   = "{}/datafiles".format(inpdir)
+        self.tmp    = "{}/tempfiles".format(inpdir)
+        self.energy = "{}/energyfiles".format(inpdir)
+        self.log    = "{}/logfiles".format(inpdir)
 
         self._check_exist_files()
 
@@ -317,16 +319,6 @@ class Files(object):
                 - energyfiles   energyfiles stores all files used in energy calculations:
                                 *.mdp, *.tpr, *.edr, *.xvg
         '''
-        inpdir = os.path.dirname(self._inputfilepath)
-        if not inpdir:
-            inpdir = '.'
-
-        self.index  = "{}/indexfiles".format(inpdir)
-        self.data   = "{}/datafiles".format(inpdir)
-        self.tmp    = "{}/tempfiles".format(inpdir)
-        self.energy = "{}/energyfiles".format(inpdir)
-        self.log    = "{}/logfiles".format(inpdir)
-
         os.makedirs(self.index, exist_ok=True)
         os.makedirs(self.data, exist_ok=True)
         os.makedirs(self.tmp, exist_ok=True)
