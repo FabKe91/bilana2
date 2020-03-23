@@ -4,3 +4,4 @@ eggs/
 *.egg
 *.egg-info
 **__pycache__
+.vscode
