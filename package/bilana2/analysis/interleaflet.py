@@ -30,6 +30,12 @@ def calculate_overlapscore(sysinfo, refsel, chainsel,
     chunksizes = []
     chunkframes = []
     u = sysinfo.universe
+
+    if len(u.residues.atoms.select_atoms(refsel)) == 0:
+        raise ValueError('Refsel "{}" never matches any atoms'.format(refsel))
+    if len(u.residues.atoms.select_atoms(chainsel)) == 0:
+        raise ValueError('chainsel "{}" never matches any atoms'.format(refsel))
+
     for ts in u.trajectory:
         time = ts.time
         if not sysinfo.within_timerange(time):
@@ -44,13 +50,14 @@ def calculate_overlapscore(sysinfo, refsel, chainsel,
         all_pos_2d[:,2] = 0
 
         for res_i in residues:
-            if res_i.resname not in sysinfo.molecules:
+            if res_i.resname not in sysinfo.molecules or not (res_i.atoms.select_atoms(refsel)):
                 continue
 
             ### Get positions for residue i ###
             ref_pos         = res_i.atoms.select_atoms(refsel).atoms.positions
             if ref_pos.shape[0] > 1:
-                raise ValueError("Just set one reference atom for selection")
+                raise ValueError("only one reference atom per molecule allowed. Found more for"\
+                    "res: {}".format(res_i))
             ref_pos = ref_pos[0]
             ref_pos_2d      = ref_pos.copy()
             ref_pos_2d[2]   = 0
@@ -135,8 +142,13 @@ def calculate_thickness(sysinfo, refsel,
     thicknesses = []
     chunkframes = []
     u = sysinfo.universe
+
+    if not len(u.residues.atoms.select_atoms(refsel)) == 0:
+        raise ValueError('refsel "{}" never matches any atoms'.format(refsel))
+
     for ts in u.trajectory:
         time = ts.time
+        LOGGER.info("At %s ps", time)
         if not sysinfo.within_timerange(time):
             continue
 
@@ -149,13 +161,14 @@ def calculate_thickness(sysinfo, refsel,
         all_pos_2d[:,2] = 0
 
         for res_i in residues:
-            if res_i.resname not in sysinfo.molecules:
+            if res_i.resname not in sysinfo.molecules or not (res_i.atoms.select_atoms(refsel)):
                 continue
 
             ### Get positions for residue i ###
             ref_pos         = res_i.atoms.select_atoms(refsel).atoms.positions
             if ref_pos.shape[0] > 1:
-                raise ValueError("Just set one reference atom for selection")
+                raise ValueError("only one reference atom per molecule allowed. Found more for"\
+                    "res: {}".format(res_i))
             ref_pos = ref_pos[0]
             ref_pos_2d      = ref_pos.copy()
             ref_pos_2d[2]   = 0
