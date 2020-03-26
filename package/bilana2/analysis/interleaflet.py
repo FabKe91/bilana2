@@ -101,7 +101,15 @@ def calculate_overlapscore(sysinfo, refsel, chainsel,
         chunkframe["time"] = time
         chunkframes.append( chunkframe )
 
+        LOGGER.debug("from residue choice:\n %s \n %s \n", res_upper, res_lower)
+        LOGGER.debug("Last entries of chunk:")
+        LOGGER.debug("res %s", resids[-1])
+        LOGGER.debug("overlap %s, with distr %s", overlaps[-1], zdistr_lower)
+        LOGGER.debug("chunksize %s", chunksizes[-1])
+
     final = pd.concat(chunkframes)
+
+    LOGGER.debug("Frame before averaging:\n%s", final)
 
     ### Calculating number of frames to be averaged over ###
     dt         = u.trajectory.dt
@@ -201,7 +209,17 @@ def calculate_thickness(sysinfo, refsel,
         chunkframe["time"] = time
         chunkframes.append( chunkframe )
 
+        LOGGER.debug("from residue choice:\n %s \n", res_within_chunk)
+        LOGGER.debug("Last entries of chunk:")
+        LOGGER.debug("res %s", resids[-1])
+        LOGGER.debug("thickness %s, from pos: %s - %s",
+            thicknesses[-1], chunk_pos_mean_upper, chunk_pos_mean_lower )
+        LOGGER.debug("chunksize %s", chunksizes[-1])
+
+
     final = pd.concat(chunkframes)
+
+    LOGGER.debug("frame before averaging:\n%s", final)
 
     ### Calculating number of frames to be averaged over ###
     dt         = u.trajectory.dt
