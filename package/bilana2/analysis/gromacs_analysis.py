@@ -70,7 +70,7 @@ def calc_rdf(systeminfo, ref, sel,
     for key, val in kw_rdf.items():
         additional_commands += ["-"+key, str(val)]
 
-    for leafndx, reslist in enumerate(systeminfo.convert.leaflet_resids):
+    for leafndx, reslist in enumerate(systeminfo.convert.leaflet_to_resids):
 
         ### Create temporary files containing the selection string for -ref and -sel flag ###
         resid_list_str = 'resid ' + ' '.join([str(i) for i in reslist])
@@ -80,7 +80,7 @@ def calc_rdf(systeminfo, ref, sel,
             if selection[0] == "ref" and refprot: # If protein is reference take all resids
                 selectstring = '{}'.format(selection[1])
             else:
-                selectstring = '{} {}'.format(selection[1], resid_list_str)
+                selectstring = '{} and {}'.format(selection[1], resid_list_str)
 
             select_fname = '{}/select{}_{}'.format(systeminfo.path.tmp,
                                                    selection[0], selection[1]).replace(" ", "_")
