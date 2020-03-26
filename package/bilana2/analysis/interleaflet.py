@@ -8,6 +8,7 @@ LOGGER = logging.getLogger("bilana2.analysis.interleaflet")
 def calculate_overlapscore(sysinfo, refsel, chainsel,
     radius=10, delta_t=1000, nbins=25,
     outputfilename="overlap_score.csv",
+    loglevel="INFO",
     ):
     '''
         Calculate the overlap of chains within the bilayer.
@@ -25,6 +26,7 @@ def calculate_overlapscore(sysinfo, refsel, chainsel,
         Output layout of file is:
             <time> <resid> <thickness> <overlap> <chunksize>
     '''
+    LOGGER.setLevel(loglevel)
     resids = []
     overlaps = []
     chunksizes = []
@@ -132,6 +134,7 @@ def calculate_overlapscore(sysinfo, refsel, chainsel,
 def calculate_thickness(sysinfo, refsel,
     radius=10, delta_t=1000,
     outputfilename="thickness_chunks.csv",
+    loglevel="INFO",
     ):
     '''
         Calculate the thickness of chunks in a bilayer.
@@ -145,20 +148,22 @@ def calculate_thickness(sysinfo, refsel,
         Output layout of file is:
             <time> <resid> <thickness> <chunksize>
     '''
+    LOGGER.setLevel(loglevel)
+
     resids = []
     chunksizes = []
     thicknesses = []
     chunkframes = []
     u = sysinfo.universe
 
-    if not len(u.residues.atoms.select_atoms(refsel)) == 0:
+    if len(u.residues.atoms.select_atoms(refsel)) == 0:
         raise ValueError('refsel "{}" never matches any atoms'.format(refsel))
 
     for ts in u.trajectory:
         time = ts.time
-        LOGGER.info("At %s ps", time)
         if not sysinfo.within_timerange(time):
             continue
+        LOGGER.info("At %s ps", time)
 
         ### Doing the calculation for each chunk ###
         box      = u.dimensions
@@ -234,6 +239,8 @@ def calculate_thickness(sysinfo, refsel,
             bins.append( (i,i+binrange[2]) )
         bins = pd.IntervalIndex.from_tuples(bins)
         final["bins"] = pd.cut(final.time, bins=bins)
+        LOGGER.debug("bins from range %s: %s", binrange, bins)
+        LOGGER.debug("frame after averaging:\n%s", final)
         final = final.groupby(["bins", "resid"]).mean().reset_index().drop(columns=["bins"])
 
     final.to_csv(outputfilename, index=False)
