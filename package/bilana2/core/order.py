@@ -16,7 +16,7 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=lo
 
 LOGGER = logging.getLogger("bilana2.core.order")
 
-def create_cc_orderfiles(sysinfo, neiblist,
+def create_cc_orderfiles(sysinfo,
     outputfile_scd='scd_distribution.dat',
     outputfile_s_profile='s_profile.dat',
     with_tilt_correction='tilt.csv'):
@@ -56,11 +56,10 @@ def create_cc_orderfiles(sysinfo, neiblist,
 
         #### Print header files ####
         print("{: <12}{: <10}{: <10}{: <7}{: <15}"\
-                .format("Time", "Residue", "leaflet", "Type", "Scd")\
-            + (len(sysinfo.molecules)*'{: ^7}').format(*sysinfo.molecules),
+                .format("time", "resid", "leaflet", "resname", "Scd"),
             file=scdfile)
         print("{: <12}{: <10}{: <10}{: <7}{: <15}{: <15}{: <10}{: <10}"\
-            .format("Time", "Residue", "leaflet", "Type", "avgS", "S", "carbon", "chain" ),
+            .format("time", "resid", "leaflet", "resname", "avgS", "S", "carbon", "chain" ),
             file=sprof_file
             )
 
@@ -82,7 +81,6 @@ def create_cc_orderfiles(sysinfo, neiblist,
                 LOGGER.debug("At time %s and residue %s", time, res)
 
                 leaflet = sysinfo.convert.resid_to_leaflet[res]
-                neibs   = neiblist[time][res]
                 resname = sysinfo.convert.resid_to_resname[res]
 
                 if new_axis is not None:
@@ -90,13 +88,6 @@ def create_cc_orderfiles(sysinfo, neiblist,
 
                 if resname not in sysinfo.molecules:
                     continue
-
-                LOGGER.debug("count neigbors ...")
-                ### Count neighbors of each molecule type ###
-                neib_comp_list = []
-                for lip in sysinfo.molecules:
-                    ncomp = [sysinfo.convert.resid_to_resname[N] for N in neibs].count(lip)
-                    neib_comp_list.append(ncomp)
 
                 LOGGER.debug("getting to positions ...")
                 ### Get positions ###
@@ -112,8 +103,7 @@ def create_cc_orderfiles(sysinfo, neiblist,
                 LOGGER.debug("printing to files ...")
                 ### Print everything to files ###
                 line_scd = "{: <12.2f}{: <10}{: <10}{: <7}{: <15.8}".format(
-                        time, res, leaflet, resname, order_val)\
-                        + (len(sysinfo.molecules)*"{: ^7}").format(*neib_comp_list)
+                        time, res, leaflet, resname, order_val)
                 print(line_scd, file=scdfile)
                 for chain_ndx, slist in enumerate(s_prof):
                     for carb_i, order_carb in enumerate(slist):
