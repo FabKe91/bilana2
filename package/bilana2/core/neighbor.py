@@ -22,7 +22,6 @@ def write_neighbor_info(sysinfo, outputfilename="neighbor_info", mode="atom"):
     ''' Creates neighbor_info file based on 2d distances (xy plane) '''
 
     refatoms         = sysinfo.reference_atomselection
-    bilayerthickness = 50 #Angstrom
 
     with open(outputfilename, "w") as outf:
         print("{: <20}{: <20}{: <20}{: <20}"\
@@ -42,9 +41,9 @@ def write_neighbor_info(sysinfo, outputfilename="neighbor_info", mode="atom"):
             LOGGER.debug("Found %s atoms: %s ", len(refatomgrp.atoms), refatomgrp.atoms)
             LOGGER.debug("Dimension of leaflets %s", np.array(refpositions).shape)
 
-            #refpositions_2d = refpositions.copy()
-            #for i in range(len(refpositions_2d)):
-            #    refpositions_2d[i][1][2] = 0
+            ### Leaflet thickness is the standarddeviation of z positions ###
+            ### of heads around bilayer center ###
+            leaflet_thickness = np.sqrt(refatomgrp.atoms.positions[:,2].var())
 
             for hostid, host_pos in refpositions:
 
@@ -67,7 +66,7 @@ def write_neighbor_info(sysinfo, outputfilename="neighbor_info", mode="atom"):
                 neiblist = []
                 for resndx, distance in enumerate(dist_array):
 
-                    if distance <= bilayerthickness/2:
+                    if distance <= leaflet_thickness:
                         distance2d = dist_array2d[resndx]
                         if distance2d <= sysinfo.cutoff*10.0:
                             neiblist.append( refpositions[resndx][0] )
