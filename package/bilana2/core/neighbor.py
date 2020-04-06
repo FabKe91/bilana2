@@ -5,6 +5,7 @@
                                 molecule per frame
         - get_neighbor_dict     Reads neighbor file created in write_neighbor_info and returns
                                 a dictionary for easy handling
+        - create_neibcount_file Creates a file with number of neighbor of each type
     ==========================================================================================
 '''
 
@@ -25,7 +26,7 @@ def write_neighbor_info(sysinfo, outputfilename="neighbor_info", mode="atom"):
 
     with open(outputfilename, "w") as outf:
         print("{: <20}{: <20}{: <20}{: <20}"\
-            .format("Resid", "Time", "Number_of_neighbors", "List_of_Neighbors"), file=outf)
+            .format("resid", "time", "Number_of_neighbors", "List_of_Neighbors"), file=outf)
 
         traj_len = len(sysinfo.universe.trajectory)
         for t in range(traj_len):
@@ -190,7 +191,39 @@ def get_neighbor_dict(neighborfilename='neighbor_info'):
         .apply(lambda x: [int(i) for i in x.split(',') if i ])
     data = data.drop( columns=["Number_of_neighbors", "List_of_Neighbors"] )
 
-    for t, fr in data.groupby("Time"):
-        neibdict[t] = fr.set_index("Resid").to_dict()["nlist"]
+    for t, fr in data.groupby("time"):
+        neibdict[t] = fr.set_index("resid").to_dict()["nlist"]
 
     return neibdict
+
+def create_neibcount_file(sysinfo, neighborlist, outputfilename="neighborcount.dat"):
+    '''
+        Creates a file that stores information about the numbers of neighbors of each lipid type
+        in the bilayer
+
+        output columns:
+
+            <time> <resid> <resname1> <resname2> ... <resnameX>
+                             ^^^
+                           #Number of neighbors of type resname1 of resid n
+    '''
+    with open(outputfilename, "w") as outf:
+        print( '{: <15}{: <10}{: <15}'.format("time", "resid", "resname")\
+            +(len(sysinfo.molecules)*'{: ^7}').format(*sysinfo.molecules), file=outf)
+
+        for ts in sysinfo.trajectory:
+            time = ts.time
+
+            for res in sysinfo.resids:
+                neibs   = neighborlist[time][res]
+                resname = sysinfo.convert.resid_to_resname[res]
+                LOGGER.debug("count neigbors ...")
+
+                ### Count neighbors of each molecule type ###
+                neib_comp_list = []
+                for lip in sysinfo.molecules:
+                    ncomp = [sysinfo.convert.resid_to_resname[N] for N in neibs].count(lip)
+                    neib_comp_list.append(ncomp)
+                outpline = "{: <15}{: <10}{: <15}".format(time, res, resname)
+                outpline += (len(sysinfo.molecules)*"{: ^7}").format(*neib_comp_list)
+                print(outpline, file=outf)

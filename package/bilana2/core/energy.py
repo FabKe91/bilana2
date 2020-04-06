@@ -580,7 +580,7 @@ def write_energyfile(energy):
         print(
               '{: <10}{: <10}{: <10}{: <20}'
               '{: <20}{: <20}{: <20}'\
-              .format("Time", "Host", "Neighbor", "Molparts",\
+              .format("time", "host", "neighbor", "molparts",\
                                        "VdW", "Coul", "Etot"),\
               file=energyoutput)
 
