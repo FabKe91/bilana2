@@ -119,7 +119,7 @@ def calculate_overlapscore(sysinfo, refsel, chainsel,
 
     if frame_step != 1: ### No need of averaing if delta_t already time step of simulation
         start_time = frame_step * dt
-        final_time = len(u.trajectory) - frame_step * dt
+        final_time = (len(u.trajectory) - frame_step) * dt
         binrange = (start_time, final_time, delta_t)
         bins =  []
         for i in np.arange(*binrange):
@@ -232,7 +232,7 @@ def calculate_thickness(sysinfo, refsel,
 
     if frame_step != 1:
         start_time = frame_step * dt
-        final_time = len(u.trajectory) - frame_step * dt
+        final_time = (len(u.trajectory) - frame_step) * dt
         binrange = (start_time, final_time, delta_t)
         bins =  []
         for i in np.arange(*binrange):
