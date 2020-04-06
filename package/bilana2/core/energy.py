@@ -176,7 +176,7 @@ class Energy(Systeminfo):
             ### ! should remain inside the loop over resids               ! ###
             res_other_leaflet = []
             for nres in self.lipid_resids:
-                leaf = self.resid_to_leaflet[nres]
+                leaf = self.convert.resid_to_leaflet[nres]
                 if leaf != leaflet:
                     res_other_leaflet.append(nres)
 

@@ -80,6 +80,9 @@ def calculate_overlapscore(sysinfo, refsel, chainsel,
 
             ### Calculate Score value ####
             tail_pos       = res_within_chunk.atoms.select_atoms(chainsel).positions
+            if len(tail_pos) == 0:
+                raise ValueError('no atoms in res {} found for chainsel "{}"'\
+                    .format(res_i, chainsel))
             min_z = min(tail_pos[:,2])
             max_z = max(tail_pos[:,2])
             tail_pos_lower = res_lower.atoms.select_atoms(chainsel).positions
@@ -118,14 +121,16 @@ def calculate_overlapscore(sysinfo, refsel, chainsel,
     frame_step = int(delta_t // dt) if int(delta_t // dt) else 1
 
     if frame_step != 1: ### No need of averaing if delta_t already time step of simulation
-        start_time = frame_step * dt
-        final_time = len(u.trajectory) - frame_step * dt
+        start_time = sysinfo.t_start
+        final_time = sysinfo.t_end - delta_t
         binrange = (start_time, final_time, delta_t)
         bins =  []
         for i in np.arange(*binrange):
             bins.append( (i,i+binrange[2]) )
         bins = pd.IntervalIndex.from_tuples(bins)
         final["bins"] = pd.cut(final.time, bins=bins)
+        LOGGER.debug("bins from range %s: %s", binrange, bins)
+        LOGGER.debug("frame after averaging:\n%s", final)
         final = final.groupby(["bins", "resid"]).mean().reset_index().drop(columns=["bins"])
 
     final.to_csv(outputfilename, index=False)
@@ -231,8 +236,8 @@ def calculate_thickness(sysinfo, refsel,
     frame_step = int(delta_t // dt) if int(delta_t // dt) else 1
 
     if frame_step != 1:
-        start_time = frame_step * dt
-        final_time = len(u.trajectory) - frame_step * dt
+        start_time = sysinfo.t_start
+        final_time = sysinfo.t_end - delta_t
         binrange = (start_time, final_time, delta_t)
         bins =  []
         for i in np.arange(*binrange):
