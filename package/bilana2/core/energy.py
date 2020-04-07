@@ -585,7 +585,7 @@ def write_energyfile(energy):
               file=energyoutput)
 
         for resid in energy.lipid_resids:
-            LOGGER.debug("Working on residue %s ...", resid)
+            LOGGER.info("Working on residue %s ...", resid)
 
             # Get neighborhood of resid
             hosttype         = energy.convert.resid_to_resname[resid]
@@ -607,7 +607,7 @@ def write_energyfile(energy):
             all_neibs_of_res = [ all_neibs_of_res[ ( i*energy.max_lipids_per_calc ):( (i+1)*energy.max_lipids_per_calc ) ] for i in range(number_of_groupfragments) ]
 
             for frag in range(number_of_groupfragments):
-                LOGGER.debug("At fragment %s", frag)
+                LOGGER.info("At fragment %s", frag)
                 xvgfilename = "{}/xvgtables/energies_residue{}_{}{}.xvg"\
                     .format(energy.path.energy, str(resid), str(frag), energy.part)
 
