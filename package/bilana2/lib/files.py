@@ -30,9 +30,6 @@ def create_eofs(outputfile="EofScd{}.csv",
     LOGGER.info("loading order file (%s)...", sfile)
     #HEAD: time   resid   leaflet  resname   Scd
     order  = pd.read_table(sfile, delim_whitespace=True)
-    #### DELETE !!! ###
-    order = order.drop(columns=[ "DPPC", "CHL1"])
-    #### DELETE !!! ###
     colnames = ["time", "resid", "leaflet", "resname", "Scd"]
     compare_cols(colnames, order.columns)
 

@@ -211,10 +211,13 @@ def create_neibcount_file(sysinfo, neighborlist, outputfilename="neighborcount.d
         print( '{: <15}{: <10}{: <15}'.format("time", "resid", "resname")\
             +(len(sysinfo.molecules)*'{: ^7}').format(*sysinfo.molecules), file=outf)
 
-        for ts in sysinfo.trajectory:
+        for ts in sysinfo.universe.trajectory:
             time = ts.time
+            if not sysinfo.within_timerange(time):
+                continue
+            LOGGER.info("At time %s", time)
 
-            for res in sysinfo.resids:
+            for res in sysinfo.lipid_resids:
                 neibs   = neighborlist[time][res]
                 resname = sysinfo.convert.resid_to_resname[res]
                 LOGGER.debug("count neigbors ...")
