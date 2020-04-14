@@ -55,10 +55,10 @@ def create_cc_orderfiles(sysinfo,
     with open(outputfile_scd, "w") as scdfile, open(outputfile_s_profile, "w") as sprof_file:
 
         #### Print header files ####
-        print("{: <12}{: <10}{: <10}{: <7}{: <15}"\
+        print("{: <12}{: <10}{: <10}{: <10}{: <15}"\
                 .format("time", "resid", "leaflet", "resname", "Scd"),
             file=scdfile)
-        print("{: <12}{: <10}{: <10}{: <7}{: <15}{: <15}{: <10}{: <10}"\
+        print("{: <12}{: <10}{: <10}{: <10}{: <15}{: <15}{: <10}{: <10}"\
             .format("time", "resid", "leaflet", "resname", "avgS", "S", "carbon", "chain" ),
             file=sprof_file
             )
