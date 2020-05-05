@@ -73,7 +73,7 @@ def create_eofs(outputfile="EofScd{}.csv",
         mask.append(res in nlist)
     energy = energy[mask].drop(columns=["nlist"])
     del neibmap
-    
+
     ### Frames okay? ###
     LOGGER.debug("neib:\n%s", neib)
     LOGGER.debug("order:\n%s", order)
@@ -104,3 +104,38 @@ def create_eofs(outputfile="EofScd{}.csv",
 
     for grpname, fr in final.groupby(["host_type", "neib_type"]):
         fr.to_csv( outputfile.format( '_'.join(grpname) ), index=False )
+
+
+def create_nofs(outputfile="NofScd.csv",
+    sfile="scd_distribution.dat",
+    neighbortypefile="neighborcount.dat"):
+    '''
+        Merges order and neighbor data for each residue.
+        Output columns are:
+        <Time> <Host> <Lipid_type> <Host_Scd> <Ntot> <Ntype1> ... <NtypeX>
+
+    '''
+    def compare_cols(expectedcol, col):
+        if set(col) != set(expectedcol):
+            raise ValueError("Columns do not fit!\nexpected: {}\nfound:{}".format(expectedcol, col))
+
+    LOGGER.info("loading order file (%s)...", sfile)
+    #HEAD: time   resid   leaflet  resname   Scd
+    order  = pd.read_table(sfile, delim_whitespace=True)
+    colnames = ["time", "resid", "leaflet", "resname", "Scd"]
+    compare_cols(colnames, order.columns)
+
+    LOGGER.info("loading neighbortype file (%s)...", neighbortypefile)
+    #HEAD: time   resid resname   Neibs_Type1 Neibs_Type2 ...
+    neib = pd.read_table(neighbortypefile, delim_whitespace=True)
+    if not ("time" in neib.columns and "resid" in neib.columns and "resname" in neib.columns):
+        compare_cols(["time", "resid", "resname", "..."], neib.columns)
+
+    ### Editing data ###
+    neib["Ntot"] = neib.drop(columns=["time", "resid", "resname"]).sum(axis=1)
+
+    ### Merging data ###
+    final = neib.merge(order, on=["time", "resid", "resname"])
+
+    ### Saving data ###
+    final.to_csv(outputfile, index=False)
