@@ -21,4 +21,8 @@ CHIM_TPR      = resource_filename(__name__, "data/mdfiles_test/tpr/dppc_chim20_3
 CHIM_TRJ      = resource_filename(__name__, "data/mdfiles_test/md_trj/dppc_chim20_330_whole.xtc")
 CHIM_GRO      = resource_filename(__name__, "data/mdfiles_test/initial_coords/dppc_chim20.gro")
 
+
+ALL_ENERGIES_10 = resource_filename(__name__, "data/all_energies_short_dppc_chol30_350_10")
+ALL_ENERGIES_08 = resource_filename(__name__, "data/all_energies_short_dppc_chol30_350_08")
+
 del resource_filename

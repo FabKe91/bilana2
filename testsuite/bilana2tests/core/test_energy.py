@@ -4,7 +4,7 @@ import bilana2
 
 import pandas as pd
 
-from bilana2tests.datafiles import CHOL_INPUT, CHOL_RESINDEX, CHOL_NEIGHBOR
+from bilana2tests.datafiles import CHOL_INPUT, CHOL_RESINDEX, CHOL_NEIGHBOR, ALL_ENERGIES_10, ALL_ENERGIES_08
 
 CHOL_RESINDEX_TEST  = "testfiles/resindex_all_test.ndx"
 CHOL_ALLENERGY_TEST = "testfiles/all_energies_test.ndx"
@@ -55,3 +55,9 @@ class TestIndexCreation:
         dat_orig = pd.read_csv(CHOL_RESINDEX)
         dat_test = pd.read_csv(CHOL_RESINDEX_TEST)
         assert dat_orig.equals(dat_test)
+
+def test_all_energies_conversion(get_energy):
+    outname = bilana2.energy.convert_energyfile_cutoff(get_energy, ALL_ENERGIES_10, 0.8)
+    dat_08_test = pd.read_table(outname, delim_whitespace=True)
+    dat_08_orig = pd.read_table(ALL_ENERGIES_08)
+    assert dat_08_orig.equals(dat_08_test)
