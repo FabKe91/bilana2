@@ -21,7 +21,9 @@
 import os
 import logging
 
+import numpy as np
 import pandas as pd
+
 
 from .systeminfo import Systeminfo
 from ..lib.gromacswrapper import GMXNAME, exec_gromacs, write_log
@@ -940,3 +942,54 @@ def add_leaflet_groups_to_index(sysinfo, add_grp_to="resindex_all.ndx"):
     with open(outputsel, "r") as selectionf, open(add_grp_to, "a") as ndxf:
         for line in selectionf:
             ndxf.write(line)
+
+def convert_energyfile_cutoff(energy: Energy, energyfile, r_max, r_min=0.0):
+    ''' Extract all neighbor interaction energies with specific cut off from r_min to r_max '''
+
+    ### outname has same filename as energyfile but additional information of r_min and r_max ###
+    outname = "{1}{2}{1}".format(*os.path.splitext(energyfile), str(r_min)+str(r_max) )
+
+    with open(energyfile, "r") as efile, open(outname, "w") as outf:
+
+        header = efile.readline()
+        print(header, file=outf)
+
+        for line in efile:
+            cols = line.split()
+
+            time = float(cols[0])
+
+            if not energy.within_timerange(time):
+                continue
+
+            host, neib = int(cols[1]), int(cols[3])
+            resn_host = energy.convert.resid_to_resname[host]
+            resn_neib = energy.convert.resid_to_resname[neib]
+
+            dt = energy.universe.trajectory.dt
+            frame_n = int(time / dt)
+
+            energy.universe.trajectory[frame_n]
+
+            ### Use new cutoff to check whether host-neib still are within range ###
+            host_pos = energy.universe.select_atoms('resname {} and resid {} and ( {} )'\
+                .format(resn_host, host, energy.reference_atomselection)).positions
+            neib_pos = energy.universe.select_atoms('resname {} and resid {} and ( {} )'\
+                .format(resn_neib, neib, energy.reference_atomselection)).positions
+
+            dist = np.linalg.norm(np.multiply(np.subtract(neib_pos,host_pos), [1,1,0]))
+
+            if np.abs(dist) < float(r_min)*10 or np.abs(dist) > float(r_max)*10:
+                continue
+
+            ### Get residual information ###
+            molparts = cols[3]
+            VDW  = float(cols[4])
+            COUL = float(cols[5])
+            Etot = float(cols[6])
+
+            ### Write output line ###
+            print('{: <10}{: <10}{: <10}{: <20}{: <20}{: <20}{: <20.5f}'\
+                .format(time, host, neib, molparts, float(VDW), float(COUL), float(Etot)),
+                file=outf)
+    return outname
