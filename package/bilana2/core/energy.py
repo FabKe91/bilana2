@@ -21,12 +21,14 @@
 import os
 import logging
 
+import numpy as np
 import pandas as pd
 
 from .systeminfo import Systeminfo
 from ..lib.gromacswrapper import GMXNAME, exec_gromacs, write_log
 
 LOGGER = logging.getLogger("bilana2.core.energy")
+
 
 class Energy(Systeminfo):
     '''
@@ -40,13 +42,13 @@ class Energy(Systeminfo):
     __NLIPIDS_MAX_PER_CALCULATION = 40
 
     def __init__(self,
-        part,
-        neiblist,
-        inputfilepath="inputfile",
-        resindex_all='resindex_all.ndx',
-        energyname="all_energies.dat",
-        overwrite=True,
-        ):
+                 part,
+                 neiblist,
+                 inputfilepath="inputfile",
+                 resindex_all='resindex_all.ndx',
+                 energyname="all_energies.dat",
+                 overwrite=True,
+                 ):
 
         super().__init__(inputfilepath)
         knownparts = ['complete', 'head-tail']
@@ -61,7 +63,7 @@ class Energy(Systeminfo):
         self.neiblist      = neiblist
         self.resindex_all  = resindex_all
         self.overwrite     = overwrite
-        self.groupblocks   = None # Will be set in run_calculation function
+        self.groupblocks   = None  # Will be set in run_calculation function
         self.part          = part
 
         if part == 'complete':
@@ -73,7 +75,7 @@ class Energy(Systeminfo):
         elif part == 'head-tail':
             self.molparts            = ["resid_h_", "resid_t_"]
             self.max_lipids_per_calc = int( self.__NLIPIDS_MAX_PER_CALCULATION / 2 )
-            self.molparts_short      = ["h_", "t_",]
+            self.molparts_short      = ["h_", "t_"]
             self.all_energies        = energyname
 
         LOGGER.info('\n Calculating for energygroups: %s', self.molparts)
@@ -97,7 +99,7 @@ class Energy(Systeminfo):
             LOGGER.info('Working on lipid %s ...', res)
 
             ### Get all neighbors of res ###
-            all_neibs_of_res = list(set([neibs for t in self.neiblist.keys()\
+            all_neibs_of_res = list(set([neibs for t in self.neiblist.keys()
                     for neibs in self.neiblist[t][res]]))
             nneibs = len(all_neibs_of_res)
 
@@ -131,7 +133,7 @@ class Energy(Systeminfo):
                                     self.path.energy, str(res), groupfragment, self.part)
 
                 xvg_out         = "{}/xvgtables/energies_residue{}_{}{}.xvg".format(
-                                    self.path.energy,  str(res), groupfragment, self.part)
+                                    self.path.energy, str(res), groupfragment, self.part)
 
                 energygroups    = self._gather_energygroups(res, all_neibs_of_res)
                 relev_energies  = self._get_relev_energies(res, all_neibs_of_res)
@@ -186,15 +188,13 @@ class Energy(Systeminfo):
             self.resindex_all = outputndx
             selectionstr = 'System=all; leaflet=resname {0} and resid {1}; resid_{2}=resid {2};'\
                            'resid_{2}; leaflet; System;'.format(
-                ' '.join(self.molecules),
-                ' '.join([str(i) for i in res_other_leaflet]),
-                res,
-                )
+                           ' '.join(self.molecules),
+                           ' '.join([str(i) for i in res_other_leaflet]), res)
             cmd = [
                 "-f", self.path.gro,
                 "-s", self.path.tpr, "-select", selectionstr,
                 "-on", outputndx,
-            ]
+                ]
             out, err = exec_gromacs(GMXNAME, "select", cmd)
             write_log("gmx_select", out, err, path=self.path.log)
 
@@ -218,12 +218,12 @@ class Energy(Systeminfo):
             self.create_MDP(mdpout, energygroups)
             self.create_TPR(mdpout, tprout)
             if os.path.isfile(energyf_output) and not self.overwrite:
-                LOGGER.info("Edrfile for lipid %s part %s already exists. "\
+                LOGGER.info("Edrfile for lipid %s part %s already exists. "
                             "Will skip this calculation.", res, self.part)
             else:
                 self.do_Energyrun(res, 0, tprout, energyf_output)
             if os.path.isfile(g_energy_output) and not self.overwrite:
-                LOGGER.info("Xvgtable for lipid %s part %s already exists. "\
+                LOGGER.info("Xvgtable for lipid %s part %s already exists. "
                             "Will skip this calculation.", res, self.part)
             else:
                 self.write_XVG(energyf_output, tprout, relev_energies, xvg_out)
@@ -232,8 +232,8 @@ class Energy(Systeminfo):
     def create_MDP(self, mdpout: str, energygroups: str):
         ''' Create mdpfile '''
         os.makedirs(self.path.energy + '/mdpfiles', exist_ok=True)
-        with open(mdpout,"w") as mdpfile_rerun:
-            raw_mdp =[x.strip() for x in '''
+        with open(mdpout, "w") as mdpfile_rerun:
+            raw_mdp = [x.strip() for x in '''
             integrator              = md
             dt                      = 0.002
             nsteps                  =
@@ -267,7 +267,7 @@ class Energy(Systeminfo):
             comm_mode               = linear
             refcoord_scaling        = com
             '''.split('\n')]
-            raw_mdp.append( 'ref_t = '+str(self.temperature) )
+            raw_mdp.append( 'ref_t = ' + str(self.temperature) )
             energygrpline = ''.join(['energygrps\t\t\t=', energygroups, '\n'])
             raw_mdp.append(energygrpline)
             mdpfile_rerun.write('\n'.join(raw_mdp)+'\n')
@@ -276,9 +276,9 @@ class Energy(Systeminfo):
         ''' Create TPRFILE with GROMPP '''
         os.makedirs(self.path.energy+'/tprfiles', exist_ok=True)
 
-        grompp_arglist = ['-f', mdpoutfile, '-p',\
-                        self.path.top, '-c', self.path.gro, '-o', tprout,\
-                        '-n', self.resindex_all, '-po', mdpoutfile\
+        grompp_arglist = ['-f', mdpoutfile, '-p',
+                        self.path.top, '-c', self.path.gro, '-o', tprout,
+                        '-n', self.resindex_all, '-po', mdpoutfile
                         ]
         out, err = exec_gromacs(GMXNAME, "grompp", grompp_arglist)
 
@@ -940,3 +940,63 @@ def add_leaflet_groups_to_index(sysinfo, add_grp_to="resindex_all.ndx"):
     with open(outputsel, "r") as selectionf, open(add_grp_to, "a") as ndxf:
         for line in selectionf:
             ndxf.write(line)
+
+def decrease_energy_cutoff(energy: Energy, cutoff,  r_min=0.0, energyfile="all_energies.dat"):
+    '''
+        This function takes all_energies table as input and filters out all neighbors that
+        are not within range of new <cutoff>
+        NOTE: This can only work if the cutoff used for creating the input energy file was higher
+              than input <cutoff>
+    '''
+
+    outname = os.path.splitext(energyfile)
+    outname = "{1}_{0}{2}".format(cutoff, outname*)
+    print(outname)
+    with open(energyfile, "r") as efile, open(outname, "w") as outf:
+        # Print header
+        header = efile.readline()
+        print(header, file=outname)
+        for line in efile:
+
+            cols = line.split()
+
+            ### Get all column information ###
+            time = float(cols[0])
+            host = int(cols[1])
+            neib = int(cols[2])
+            molparts = cols[3]
+            VDW  = float(cols[4])
+            COUL = float(cols[5])
+            Etot = float(cols[6])
+
+            if not energy.within_timerange(time):
+                continue
+
+            ### Get resid information ###
+            resn_host = energy.convert.resid_to_resname[host]
+            resn_neib = energy.convert.resid_to_resname[neib]
+
+            ### Set universe to correct time ###
+            dt = energy.universe.trajectory.dt
+            frame_n = int(time / dt)
+            energy.universe.trajectory[frame_n]
+
+            ### get host and neighbor positions ###
+            host_pos = energy.universe.select_atoms('resname {} and resid {} and ( {} )'\
+                .format(resn_host, host, energy.reference_atomselection)).positions
+            neib_pos = energy.universe.select_atoms('resname {} and resid {} and ( {} )'\
+                .format(resn_neib, neib, energy.reference_atomselection).positions
+
+            if not np.all([host_pos.shape[0] == 1, neib_pos.shape[0] == 1]):
+                raise ValueError("There were multiple atoms chosen as reference")
+
+            ### Skip if distance is not within cutoff range ###
+            dist = np.linalg.norm(np.multiply(np.subtract(neib_pos, host_pos), np.array([1,1,0])))
+            if np.abs(dist) < float(r_min)*10 or np.abs(dist) > float(r_max)*10:
+                continue
+
+            ### Write output line ###
+            print(
+                '{: <12.1f}{: <10}{: <10}{: <15}{: <15.5f}{: <15.5f}{: <15.5f}'\
+                .format(time, host, neib, molparts, Etot, VDW, COUL), file=outf)
+    return outname
