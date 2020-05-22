@@ -941,7 +941,13 @@ def add_leaflet_groups_to_index(sysinfo, add_grp_to="resindex_all.ndx"):
         for line in selectionf:
             ndxf.write(line)
 
-def assemble_eofs_slices(energy: Energy, cutoff,  r_min=0.0, energyfile="all_energies.dat"):
+def decrease_energy_cutoff(energy: Energy, cutoff,  r_min=0.0, energyfile="all_energies.dat"):
+    '''
+        This function takes all_energies table as input and filters out all neighbors that
+        are not within range of new <cutoff>
+        NOTE: This can only work if the cutoff used for creating the input energy file was higher
+              than input <cutoff>
+    '''
 
     outname = os.path.splitext(energyfile)
     outname = "{1}_{0}{2}".format(cutoff, outname*)
