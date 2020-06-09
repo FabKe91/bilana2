@@ -399,11 +399,11 @@ class Energy(Systeminfo):
 def create_lipid_leaflet_interaction_file(sysinfo, outputfilename="resid_leaflet_interaction.dat"):
     ''' Create a file with entries of
         interaction of resid at time to leaflet0 and leaflet1
-        <Time> <resid> <resname> <host_leaflet> <Etot> <Evdw> <Ecoul>
+        <time> <resid> <resname> <host_leaflet> <Etot> <Evdw> <Ecoul>
     '''
     energyoutput = open(outputfilename, "w")
     print('{: <10}{: <10}{: <10}{: <10}{: <20}{: <20}{: <20}'\
-        .format("Time", "resid", "resname", "leaflet_h", "Etot", "Evdw", "Ecoul"),
+        .format("time", "resid", "resname", "leaflet_h", "Etot", "Evdw", "Ecoul"),
             file=energyoutput)
     for resid in sysinfo.lipid_resids:
         resname = sysinfo.convert.resid_to_resname[resid]
@@ -450,7 +450,7 @@ def write_selfinteractionfile(energy):
         print(\
               '{: <10}{: <10}{: <10}'
               '{: <20}{: <20}{: <20}{: <20}{: <20}{: <20}{: <20}'\
-              .format("Time", "resid", "resname",
+              .format("time", "resid", "resname",
                       "Etot", "VdWSR", "CoulSR", "VdW14", "Coul14", "VdWtot", "Coultot", ),
               file=energyoutput)
 
@@ -791,11 +791,11 @@ def write_energyfile(energy):
 def create_lipid_water_interaction_file(energy, outputfilename="water_interaction.dat"):
     ''' Create a file with entries of
         interaction of resid at time to solvent
-        <Time> <resid> <resname> <Etot> <Evdw> <Ecoul>
+        <time> <resid> <resname> <Etot> <Evdw> <Ecoul>
     '''
     energyoutput = open(outputfilename, "w")
     print('{: <10}{: <10}{: <10}{: <20}{: <20}{: <20}'\
-        .format("Time", "resid", "resname", "Etot", "Evdw", "Ecoul"), file=energyoutput)
+        .format("time", "resid", "resname", "Etot", "Evdw", "Ecoul"), file=energyoutput)
     for resid in energy.lipid_resids:
         resname = energy.convert.resid_to_resname[resid]
         xvgfilename = "{}/xvgtables/energies_residue{}_0.xvg"\
@@ -950,12 +950,11 @@ def decrease_energy_cutoff(energy: Energy, cutoff,  r_min=0.0, energyfile="all_e
     '''
 
     outname = os.path.splitext(energyfile)
-    outname = "{1}_{0}{2}".format(cutoff, outname*)
-    print(outname)
+    outname = "{1}_{0}{2}".format(cutoff, *outname)
     with open(energyfile, "r") as efile, open(outname, "w") as outf:
         # Print header
         header = efile.readline()
-        print(header, file=outname)
+        outf.write(header)
         for line in efile:
 
             cols = line.split()
@@ -969,8 +968,7 @@ def decrease_energy_cutoff(energy: Energy, cutoff,  r_min=0.0, energyfile="all_e
             COUL = float(cols[5])
             Etot = float(cols[6])
 
-            if not energy.within_timerange(time):
-                continue
+            LOGGER.info("At %s ps", time)
 
             ### Get resid information ###
             resn_host = energy.convert.resid_to_resname[host]
@@ -985,14 +983,14 @@ def decrease_energy_cutoff(energy: Energy, cutoff,  r_min=0.0, energyfile="all_e
             host_pos = energy.universe.select_atoms('resname {} and resid {} and ( {} )'\
                 .format(resn_host, host, energy.reference_atomselection)).positions
             neib_pos = energy.universe.select_atoms('resname {} and resid {} and ( {} )'\
-                .format(resn_neib, neib, energy.reference_atomselection).positions
+                .format(resn_neib, neib, energy.reference_atomselection)).positions
 
-            if not np.all([host_pos.shape[0] == 1, neib_pos.shape[0] == 1]):
+            if not np.all([ host_pos.shape[0] == 1, neib_pos.shape[0] == 1] ):
                 raise ValueError("There were multiple atoms chosen as reference")
 
             ### Skip if distance is not within cutoff range ###
             dist = np.linalg.norm(np.multiply(np.subtract(neib_pos, host_pos), np.array([1,1,0])))
-            if np.abs(dist) < float(r_min)*10 or np.abs(dist) > float(r_max)*10:
+            if np.abs(dist) < float(r_min)*10 or np.abs(dist) > float(cutoff)*10:
                 continue
 
             ### Write output line ###
