@@ -21,7 +21,6 @@
 import os
 import logging
 
-import numpy as np
 import pandas as pd
 
 from .systeminfo import Systeminfo
@@ -940,63 +939,3 @@ def add_leaflet_groups_to_index(sysinfo, add_grp_to="resindex_all.ndx"):
     with open(outputsel, "r") as selectionf, open(add_grp_to, "a") as ndxf:
         for line in selectionf:
             ndxf.write(line)
-
-def decrease_energy_cutoff(energy: Energy, cutoff,  r_min=0.0, energyfile="all_energies.dat"):
-    '''
-        This function takes all_energies table as input and filters out all neighbors that
-        are not within range of new <cutoff>
-        NOTE: This can only work if the cutoff used for creating the input energy file was higher
-              than input <cutoff>
-    '''
-
-    outname = os.path.splitext(energyfile)
-    outname = "{1}_{0}{2}".format(cutoff, outname*)
-    print(outname)
-    with open(energyfile, "r") as efile, open(outname, "w") as outf:
-        # Print header
-        header = efile.readline()
-        print(header, file=outname)
-        for line in efile:
-
-            cols = line.split()
-
-            ### Get all column information ###
-            time = float(cols[0])
-            host = int(cols[1])
-            neib = int(cols[2])
-            molparts = cols[3]
-            VDW  = float(cols[4])
-            COUL = float(cols[5])
-            Etot = float(cols[6])
-
-            if not energy.within_timerange(time):
-                continue
-
-            ### Get resid information ###
-            resn_host = energy.convert.resid_to_resname[host]
-            resn_neib = energy.convert.resid_to_resname[neib]
-
-            ### Set universe to correct time ###
-            dt = energy.universe.trajectory.dt
-            frame_n = int(time / dt)
-            energy.universe.trajectory[frame_n]
-
-            ### get host and neighbor positions ###
-            host_pos = energy.universe.select_atoms('resname {} and resid {} and ( {} )'\
-                .format(resn_host, host, energy.reference_atomselection)).positions
-            neib_pos = energy.universe.select_atoms('resname {} and resid {} and ( {} )'\
-                .format(resn_neib, neib, energy.reference_atomselection).positions
-
-            if not np.all([host_pos.shape[0] == 1, neib_pos.shape[0] == 1]):
-                raise ValueError("There were multiple atoms chosen as reference")
-
-            ### Skip if distance is not within cutoff range ###
-            dist = np.linalg.norm(np.multiply(np.subtract(neib_pos, host_pos), np.array([1,1,0])))
-            if np.abs(dist) < float(r_min)*10 or np.abs(dist) > float(r_max)*10:
-                continue
-
-            ### Write output line ###
-            print(
-                '{: <12.1f}{: <10}{: <10}{: <15}{: <15.5f}{: <15.5f}{: <15.5f}'\
-                .format(time, host, neib, molparts, Etot, VDW, COUL), file=outf)
-    return outname
