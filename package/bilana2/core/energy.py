@@ -177,19 +177,31 @@ class Energy(Systeminfo):
             ### ! it should be dynamic, thus for future purpose this loop ! ###
             ### ! should remain inside the loop over resids               ! ###
             res_other_leaflet = []
+            res_same_leaflet = []
             for nres in self.lipid_resids:
                 leaf = self.convert.resid_to_leaflet[nres]
                 if leaf != leaflet:
                     res_other_leaflet.append(nres)
+                else:
+                    if nres == res:
+                        continue
+                    res_same_leaflet.append(nres)
 
             ### Create an index file containing the reference molecule and ###
             ### indices of all mols in the opposing leaflet                ###
             outputndx = "{}/energy_leaflet_res{}.ndx".format(self.path.tmp, res)
             self.resindex_all = outputndx
-            selectionstr = 'System=all; leaflet=resname {0} and resid {1}; resid_{2}=resid {2};'\
-                           'resid_{2}; leaflet; System;'.format(
-                           ' '.join(self.molecules),
-                           ' '.join([str(i) for i in res_other_leaflet]), res)
+            selectionstr = 'System=all;'\
+                           'interleaflet=resname {resnames} and resid {interlipids};'\
+                           'leaflet=resname {resnames} and resid {leafletlipids};'\
+                           'resid_{hostid}=resid {hostid};'\
+                           'resid_{hostid}; interleaflet; leaflet; System;'\
+                           .format(resnames=' '.join(self.molecules),
+                                interlipids=' '.join([str(i) for i in res_other_leaflet]),
+                                leafletlipids=' '.join([str(i) for i in res_same_leaflet]),
+                                hostid=res,
+                           )
+
             cmd = [
                 "-f", self.path.gro,
                 "-s", self.path.tpr, "-select", selectionstr,
@@ -423,9 +435,11 @@ def create_lipid_leaflet_interaction_file(sysinfo, outputfilename="resid_leaflet
                     rowindex  = int(energyline_cols[1][1:])+1 # time is at row 0 !
                     host = energyline_cols[3].split("resid_")[1].split("-")[0]
                     energytype = energyline_cols[3].split("-")[0][1:]
+                    ### leaflet type can be either "leaflet" or "interleaflet" ###
+                    leaflet_type = energyline_cols[3].split("-")[1]
                     LOGGER.debug("Hostid: %s:", host)
 
-                    res_to_rowindex[(energytype, host)] = rowindex
+                    res_to_rowindex[(energytype, leaflet_type, host)] = rowindex
                     LOGGER.debug("Adding to dict: Etype %s, host %s", energytype, host)
 
                 ### pick correct energies from energyfile and print ###
@@ -434,8 +448,57 @@ def create_lipid_leaflet_interaction_file(sysinfo, outputfilename="resid_leaflet
                     if time % sysinfo.dt != 0:
                         continue
 
-                    vdw  = float( energyline_cols[ res_to_rowindex[ ( 'LJ', str(resid) ) ] ] )
-                    coul = float( energyline_cols[ res_to_rowindex[ ( 'Coul', str(resid) ) ] ] )
+                    vdw  = float( energyline_cols[ res_to_rowindex[ ( 'LJ', "leaflet", str(resid) ) ] ] )
+                    coul = float( energyline_cols[ res_to_rowindex[ ( 'Coul', "leaflet", str(resid) ) ] ] )
+                    Etot = vdw + coul
+                    outpline = '{: <10}{: <10}{: <10}{: <10}{: <20.5f}{: <20.5f}{: <20.5f}'\
+                        .format(time, resid, resname, leaflet, Etot, vdw, coul,)
+                    print(outpline, file=energyoutput)
+    energyoutput.close()
+
+
+def create_lipid_interleaflet_interaction_file(sysinfo, outputfilename="resid_interleaflet_interaction.dat"):
+    ''' Create a file with entries of
+        interaction of resid at time to leaflet0 and leaflet1
+        <time> <resid> <resname> <host_leaflet> <Etot> <Evdw> <Ecoul>
+    '''
+    energyoutput = open(outputfilename, "w")
+    print('{: <10}{: <10}{: <10}{: <10}{: <20}{: <20}{: <20}'\
+        .format("time", "resid", "resname", "leaflet_h", "Etot", "Evdw", "Ecoul"),
+            file=energyoutput)
+    for resid in sysinfo.lipid_resids:
+        resname = sysinfo.convert.resid_to_resname[resid]
+        leaflet = sysinfo.convert.resid_to_leaflet[resid]
+        xvgfilename = "{}/xvgtables/energies_residue{}_leaflet.xvg"\
+                .format( sysinfo.path.energy, str(resid) )
+
+        with open(xvgfilename,"r") as xvgfile:
+            res_to_rowindex = {}
+
+            ### folderlayout is: <time> <Coul_resHost_resNeib> <LJ_resHost_resNeib> ... ###
+            for energyline in xvgfile:
+                energyline_cols = energyline.split()
+
+                ### creating a dict to know which column(energies) belong to which residue ###
+                if '@ s' in energyline:
+                    rowindex  = int(energyline_cols[1][1:])+1 # time is at row 0 !
+                    host = energyline_cols[3].split("resid_")[1].split("-")[0]
+                    energytype = energyline_cols[3].split("-")[0][1:]
+                    ### leaflet type can be either "leaflet" or "interleaflet" ###
+                    leaflet_type = energyline_cols[3].split("-")[1]
+                    LOGGER.debug("Hostid: %s:", host)
+
+                    res_to_rowindex[(energytype, leaflet_type, host)] = rowindex
+                    LOGGER.debug("Adding to dict: Etype %s, host %s", energytype, host)
+
+                ### pick correct energies from energyfile and print ###
+                elif '@' not in energyline and '#' not in energyline:
+                    time = float(energyline_cols[0])
+                    if time % sysinfo.dt != 0:
+                        continue
+
+                    vdw  = float( energyline_cols[ res_to_rowindex[ ( 'LJ', "interleaflet", str(resid) ) ] ] )
+                    coul = float( energyline_cols[ res_to_rowindex[ ( 'Coul', "interleaflet", str(resid) ) ] ] )
                     Etot = vdw + coul
                     outpline = '{: <10}{: <10}{: <10}{: <10}{: <20.5f}{: <20.5f}{: <20.5f}'\
                         .format(time, resid, resname, leaflet, Etot, vdw, coul,)
@@ -940,6 +1003,7 @@ def add_leaflet_groups_to_index(sysinfo, add_grp_to="resindex_all.ndx"):
     with open(outputsel, "r") as selectionf, open(add_grp_to, "a") as ndxf:
         for line in selectionf:
             ndxf.write(line)
+
 
 def decrease_energy_cutoff(energy: Energy, cutoff,  r_min=0.0, energyfile="all_energies.dat"):
     '''
