@@ -398,11 +398,11 @@ class Energy(Systeminfo):
 def create_lipid_leaflet_interaction_file(sysinfo, outputfilename="resid_leaflet_interaction.dat"):
     ''' Create a file with entries of
         interaction of resid at time to leaflet0 and leaflet1
-        <Time> <resid> <resname> <host_leaflet> <Etot> <Evdw> <Ecoul>
+        <time> <resid> <resname> <host_leaflet> <Etot> <Evdw> <Ecoul>
     '''
     energyoutput = open(outputfilename, "w")
     print('{: <10}{: <10}{: <10}{: <10}{: <20}{: <20}{: <20}'\
-        .format("Time", "resid", "resname", "leaflet_h", "Etot", "Evdw", "Ecoul"),
+        .format("time", "resid", "resname", "leaflet_h", "Etot", "Evdw", "Ecoul"),
             file=energyoutput)
     for resid in sysinfo.lipid_resids:
         resname = sysinfo.convert.resid_to_resname[resid]
@@ -449,7 +449,7 @@ def write_selfinteractionfile(energy):
         print(\
               '{: <10}{: <10}{: <10}'
               '{: <20}{: <20}{: <20}{: <20}{: <20}{: <20}{: <20}'\
-              .format("Time", "resid", "resname",
+              .format("time", "resid", "resname",
                       "Etot", "VdWSR", "CoulSR", "VdW14", "Coul14", "VdWtot", "Coultot", ),
               file=energyoutput)
 
@@ -790,11 +790,11 @@ def write_energyfile(energy):
 def create_lipid_water_interaction_file(energy, outputfilename="water_interaction.dat"):
     ''' Create a file with entries of
         interaction of resid at time to solvent
-        <Time> <resid> <resname> <Etot> <Evdw> <Ecoul>
+        <time> <resid> <resname> <Etot> <Evdw> <Ecoul>
     '''
     energyoutput = open(outputfilename, "w")
     print('{: <10}{: <10}{: <10}{: <20}{: <20}{: <20}'\
-        .format("Time", "resid", "resname", "Etot", "Evdw", "Ecoul"), file=energyoutput)
+        .format("time", "resid", "resname", "Etot", "Evdw", "Ecoul"), file=energyoutput)
     for resid in energy.lipid_resids:
         resname = energy.convert.resid_to_resname[resid]
         xvgfilename = "{}/xvgtables/energies_residue{}_0.xvg"\
