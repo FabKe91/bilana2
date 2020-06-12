@@ -220,9 +220,11 @@ class Energy(Systeminfo):
                                 .format(self.path.energy, str(res))
             xvg_out         = '{}/xvgtables/energies_residue{}_leaflet.xvg'\
                                 .format(self.path.energy, str(res))
-            energygroups    = "resid_{} leaflet".format(res)
+            energygroups    = "resid_{} leaflet interleaflet".format(res)
             relev_energies  = '\n'.join(
-                ["Coul-SR:resid_{}-leaflet".format(res), "LJ-SR:resid_{}-leaflet".format(res), '\n']
+                ["Coul-SR:resid_{}-leaflet".format(res), "LJ-SR:resid_{}-leaflet".format(res),
+                 "Coul-SR:resid_{}-interleaflet".format(res), "LJ-SR:resid_{}-interleaflet".format(res),
+                '\n']
                 )
 
             # Run functions
