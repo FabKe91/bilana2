@@ -437,11 +437,11 @@ def create_lipid_leaflet_interaction_file(sysinfo, outputfilename="resid_leaflet
                     host = energyline_cols[3].split("resid_")[1].split("-")[0]
                     energytype = energyline_cols[3].split("-")[0][1:]
                     ### leaflet type can be either "leaflet" or "interleaflet" ###
-                    leaflet_type = energyline_cols[3].split("-")[1]
+                    leaflet_type = energyline_cols[3].split("-")[2][:-1]
                     LOGGER.debug("Hostid: %s:", host)
 
                     res_to_rowindex[(energytype, leaflet_type, host)] = rowindex
-                    LOGGER.debug("Adding to dict: Etype %s, host %s", energytype, host)
+                    LOGGER.debug("Adding to dict: Etype %s, leaflettype: %s, host %s", energytype, leaflet_type, host)
 
                 ### pick correct energies from energyfile and print ###
                 elif '@' not in energyline and '#' not in energyline:
@@ -486,11 +486,11 @@ def create_lipid_interleaflet_interaction_file(sysinfo, outputfilename="resid_in
                     host = energyline_cols[3].split("resid_")[1].split("-")[0]
                     energytype = energyline_cols[3].split("-")[0][1:]
                     ### leaflet type can be either "leaflet" or "interleaflet" ###
-                    leaflet_type = energyline_cols[3].split("-")[1]
+                    leaflet_type = energyline_cols[3].split("-")[2][:-1]
                     LOGGER.debug("Hostid: %s:", host)
 
                     res_to_rowindex[(energytype, leaflet_type, host)] = rowindex
-                    LOGGER.debug("Adding to dict: Etype %s, host %s", energytype, host)
+                    LOGGER.debug("Adding to dict: Etype %s, leaflettype: %s, host %s", energytype, leaflet_type, host)
 
                 ### pick correct energies from energyfile and print ###
                 elif '@' not in energyline and '#' not in energyline:
