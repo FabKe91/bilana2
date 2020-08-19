@@ -43,6 +43,7 @@ def find_executable(executable, path=None):
                 f = os.path.join(p, execname)
                 if os.path.isfile(f):
                     return f
+    raise LookupError("No Gromacs executable found")
 
 def exec_gromacs(gmx, gmxlib, inpargs, interactive=None):
     '''
@@ -111,3 +112,4 @@ def write_log(name_specifier, stdout, stderr, path="."):
 
 
 GMXNAME = find_executable("gmx")
+
