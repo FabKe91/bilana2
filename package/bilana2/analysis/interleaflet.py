@@ -152,6 +152,8 @@ def calculate_thickness(sysinfo, refsel,
 
         Output layout of file is:
             <time> <resid> <thickness> <chunksize>
+
+        There will be a second outputfile, saving the maximum height difference in each frame
     '''
     LOGGER.setLevel(loglevel)
 
@@ -228,6 +230,11 @@ def calculate_thickness(sysinfo, refsel,
 
 
     final = pd.concat(chunkframes)
+
+    ### Find minimum and maximum height and calculate difference ###
+    s = final.groupby("time").apply(lambda x: x.thickness.max() - x.thickness.min() )
+    s = s.reset_index(name="deltah")
+    s.to_csv("max_deltaheight.csv", index=False)
 
     LOGGER.debug("frame before averaging:\n%s", final)
 
