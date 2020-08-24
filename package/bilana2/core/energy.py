@@ -983,7 +983,7 @@ def add_water_groups_to_index(sysinfo, add_grp_to="resindex_all.ndx"):
 
 def add_leaflet_groups_to_index(sysinfo, add_grp_to="resindex_all.ndx"):
     ''' Make index file using gmx select and append index group to <add_grp_to> '''
-    #leafdat = pd.read_table(sysinfo., delim_whitespace=True)
+    #leafdat = pd.read_table(sysinfo., sep="\s+")
     resid_list = [[], []]
     outputsel = sysinfo.path.tmp + "/tmp_leaflet.ndx"
     for resid in sysinfo.lipid_resids:

@@ -23,25 +23,25 @@ def create_eofs(outputfile="EofScd{}.csv",
 
     LOGGER.info("loading energy file (%s)...", efile)
     #HEAD: time   host   neighbor  molparts     VdW       Coul       Etot
-    energy = pd.read_table(efile, delim_whitespace=True)
+    energy = pd.read_table(efile, sep="\s+")
     colnames = ["time", "host", "neighbor", "molparts", "VdW", "Coul", "Etot"]
     compare_cols(colnames, energy.columns)
 
     LOGGER.info("loading order file (%s)...", sfile)
     #HEAD: time   resid   leaflet  resname   Scd
-    order  = pd.read_table(sfile, delim_whitespace=True)
+    order  = pd.read_table(sfile, sep="\s+")
     colnames = ["time", "resid", "leaflet", "resname", "Scd"]
     compare_cols(colnames, order.columns)
 
     LOGGER.info("loading neighbortype file (%s)...", neighbortypefile)
     #HEAD: time   resid resname   Neibs_Type1 Neibs_Type2 ...
-    neib = pd.read_table(neighbortypefile, delim_whitespace=True)
+    neib = pd.read_table(neighbortypefile, sep="\s+")
     if not ("time" in neib.columns and "resid" in neib.columns and "resname" in neib.columns):
         compare_cols(["time", "resid", "resname", "..."], neib.columns)
 
     LOGGER.info("loading neighbor info file (%s)...", neighborinfofile)
     #HEAD: resid  time  Number_of_neighbors List_of_Neighbors
-    neibmap = pd.read_table(neighborinfofile, delim_whitespace=True)
+    neibmap = pd.read_table(neighborinfofile, sep="\s+")
     colnames = ["time", "resid", "Number_of_neighbors", "List_of_Neighbors"]
     compare_cols(colnames, neibmap.columns)
 
@@ -121,13 +121,13 @@ def create_nofs(outputfile="NofScd.csv",
 
     LOGGER.info("loading order file (%s)...", sfile)
     #HEAD: time   resid   leaflet  resname   Scd
-    order  = pd.read_table(sfile, delim_whitespace=True)
+    order  = pd.read_table(sfile, sep="\s+")
     colnames = ["time", "resid", "leaflet", "resname", "Scd"]
     compare_cols(colnames, order.columns)
 
     LOGGER.info("loading neighbortype file (%s)...", neighbortypefile)
     #HEAD: time   resid resname   Neibs_Type1 Neibs_Type2 ...
-    neib = pd.read_table(neighbortypefile, delim_whitespace=True)
+    neib = pd.read_table(neighbortypefile, sep="\s+")
     if not ("time" in neib.columns and "resid" in neib.columns and "resname" in neib.columns):
         compare_cols(["time", "resid", "resname", "..."], neib.columns)
 
