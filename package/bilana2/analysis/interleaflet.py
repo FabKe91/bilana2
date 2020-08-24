@@ -147,8 +147,8 @@ def calculate_thickness(sysinfo, refsel,
         (using only xy distance)
 
         refsel:     Selection of reference atoms to give a reference position
-        radius:     Gives the radius of the chunk size around each reference lipid
-        delta_t:    Time frame to average over in ps
+        radius:     Gives the radius of the chunk size around each reference lipid (°A)
+        delta_t:    Time frame to average over (ps)
 
         Output layout of file is:
             <time> <resid> <thickness> <chunksize>
@@ -156,6 +156,8 @@ def calculate_thickness(sysinfo, refsel,
         There will be a second outputfile, saving the maximum height difference in each frame
     '''
     LOGGER.setLevel(loglevel)
+
+    LOGGER.info("Calculating with selection: %s\n Using r=%s and delta_t=%s ps", refsel, radius, delta_t)
 
     resids = []
     chunksizes = []
@@ -183,6 +185,8 @@ def calculate_thickness(sysinfo, refsel,
         for res_i in residues:
             if res_i.resname not in sysinfo.molecules or not (res_i.atoms.select_atoms(refsel)):
                 continue
+            LOGGER.debug("\n\n")
+            LOGGER.debug("At time %s res %s", time, res_i) 
 
             ### Get positions for residue i ###
             ref_pos         = res_i.atoms.select_atoms(refsel).atoms.positions
@@ -206,11 +210,19 @@ def calculate_thickness(sysinfo, refsel,
             chunk_pos_lower = chunk_pos[chunk_pos[:,2] <= chunk_pos_z_mean]
             chunk_pos_upper = chunk_pos[chunk_pos[:,2]  > chunk_pos_z_mean]
 
+            LOGGER.debug("Z mean %s", chunk_pos_z_mean)
+            LOGGER.debug("Positions lower %s", chunk_pos_lower)
+            LOGGER.debug("Positions upper %s", chunk_pos_upper)
+
             ### Now calculating thickness ###
             chunk_pos_mean_upper = chunk_pos_upper[:,2].mean()
             chunk_pos_mean_lower = chunk_pos_lower[:,2].mean()
 
             thickness = np.abs( chunk_pos_mean_upper - chunk_pos_mean_lower )
+
+            LOGGER.debug("Pos mean upper: %s", chunk_pos_mean_upper, )
+            LOGGER.debug("Pos mean lower %s",  chunk_pos_mean_lower)
+            LOGGER.debug("Resulting thickness %s", thickness)
 
             ### Add data to container ###
             resids.append(res_i.resid)
@@ -232,8 +244,16 @@ def calculate_thickness(sysinfo, refsel,
     final = pd.concat(chunkframes)
 
     ### Find minimum and maximum height and calculate difference ###
-    s = final.groupby("time").apply(lambda x: x.thickness.max() - x.thickness.min() )
-    s = s.reset_index(name="deltah")
+    #s = final.groupby("time").apply(lambda x: x.thickness.max() - x.thickness.min() )
+    #s = s.reset_index(name="deltah")
+    
+    frames = []
+    for time, frame in final.groupby("time"):
+        maxth, minth= (frame.thickness.max(), frame.thickness.min())
+        deltah = maxth - minth
+        frames.append(pd.DataFrame({"time":[time], "deltah":[deltah], "thickness_min":[minth], "thickness_max":[maxth]}))
+        print(frames[-1])
+    s = pd.concat(frames)
     s.to_csv("max_deltaheight.csv", index=False)
 
     LOGGER.debug("frame before averaging:\n%s", final)
