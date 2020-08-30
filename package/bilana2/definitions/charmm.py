@@ -29,8 +29,8 @@
 TAILS             = ['DP', 'DM', 'DS', 'DO', 'DY', 'DU', 'PO', 'PL']
 HEADS             = ['PC', 'PE', 'PS', 'PI', 'PA']
 STEROLS           = ['CHL1', 'CHIM', 'CH0M', 'ERG', 'ch1m']
-PROTEIN_SEQUENCES = ['WSC1', ]
-PROTEIN_RESIDUES  = ['VAL', 'GLY', 'ALA', 'ILE', 'LEU', 'CYS', 'ARG', 'HSD']
+#PROTEIN_SEQUENCES = ['WSC1', ]
+AMINO_ACIDS       = ['VAL', 'GLY', 'ALA', 'ILE', 'LEU', 'CYS', 'ARG', 'HSD']
 IONS              = ["CL", "POT", "NA" ]
 WATER             = ["TIP3", "SOL",]
 SOLVENTS          = WATER + IONS
@@ -180,13 +180,46 @@ CENTRAL_ATOM_OF = {
     'CH0M':'C20',
     'ch1m':'C20',
     'ERG':'O3',
-    'WSC1':'N',
+    'AA':'CA',
     }
 
 # ====================================================
 # Protein specific definitions
 # ====================================================
 
-RESNAME_SEQUENCE_OF_PROTEIN = {
-    "WSC1":[ 'A NVGAI VGGVV GGVVG AVAIA LCILL IVRHI N' ],
-    }
+AMINO_ACIDS = ["ALA", "ARG", "ASN", "ASP", "ASX", "CYS", "GLU", "GLN", "GLX", "GLY", "HIS",
+      "ILE", "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "TRP", "TYR", "VAL",
+      "PROT", "AA", "protein"
+]
+
+AA_BACKBONE = ["N", "HN", "CA", "HA", "C"]
+
+AA_SIDECHAINS = {
+            "ALA":["CB", "HB1", "HB2", "HB3"],
+            "ARG":raise KeyError,
+            "ASN":raise KeyError,
+            "ASP":raise KeyError,
+            "ASX":raise KeyError,
+            "CYS":raise KeyError,
+            "GLU":raise KeyError,
+            "GLN":raise KeyError,
+            "GLX":raise KeyError,
+            "GLY":raise KeyError,
+            "HIS":raise KeyError,
+            "ILE":raise KeyError,
+            "LEU":raise KeyError,
+            "LYS":raise KeyError,
+            "MET":raise KeyError,
+            "PHE":raise KeyError,
+            "PRO":raise KeyError,
+            "SER":raise KeyError,
+            "THR":raise KeyError,
+            "TRP":raise KeyError,
+            "TYR":raise KeyError,
+            "VAL":raise KeyError,
+}
+
+#RESNAME_SEQUENCE_OF_PROTEIN = {
+#    "WSC1":[ 'A NVGAI VGGVV GGVVG AVAIA LCILL IVRHI N' ],
+#    }
+#
