@@ -11,6 +11,7 @@ import logging
 import numpy as np
 import MDAnalysis as mda
 
+from .core.protein import Protein, get_residuegroup_from_seq
 from ..lib import common as cm
 from .forcefields import Forcefield
 
@@ -70,6 +71,7 @@ class Systeminfo(object):
         self.forcefieldname          = None
         self.mdfilespath             = None
         self._inputfile_times        = None
+        self.protein_sequences       = None
 
         self._read_input_and_set_attributes( inputfilepath )
 
@@ -82,6 +84,12 @@ class Systeminfo(object):
         self.ff       = Forcefield(self.forcefieldname)
         self.universe = mda.Universe(self.path.gro, self.path.trj)
         self.convert  = Conv(self.universe, self.ff, self.molecules)
+
+        # ===========================================
+        # Store geometric information
+        # ===========================================
+
+        self.bilayerregions = self._define_bilayer_regions()
 
         # ==============================================================
         #  Set the times from input file or gathered from mda.Universe
@@ -110,18 +118,21 @@ class Systeminfo(object):
                     ( (mol in self.molecules) and self.ff.is_sterol(mol) ) ]
         self.sterol_resids    = []
 
-        self.protein_sequence = [mol for mol in self.molecules if self.ff.is_protein(mol) ]
-        self.protein_resnames  = [ mol for mol in np.unique(self.universe.residues.resnames) if \
-                    ( (mol in self.molecules) and self.ff.is_protein(mol) ) ]
-        self.protein_resnames = []
-        self.protein_resids   = []
-
         if self.sterol_resnames:
             self._add_sterol_resids()
-        if self.protein_sequence:
-            self._add_protein_resids_and_resnames()
 
         self._check_if_all_molecules_found()
+
+        # ===========================================
+        # Store information about proteins in system
+        # ===========================================
+
+        self.proteins = []
+        self.n_proteins = len(self.protein_sequences)
+
+        if self.protein_sequences:
+            self._add_proteins()
+
 
     def within_timerange(self, time):
         return (self.t_start <= time <= self.t_end) and (time % self.dt == 0)
@@ -138,14 +149,10 @@ class Systeminfo(object):
             'resname {}'.format( ' '.join( self.sterol_resnames ) )
             ).resids))
 
-    def _add_protein_resids_and_resnames(self):
-        for seq in self.protein_sequence:
-            self.protein_resnames += self.ff.get_resnames_from_sequence(seq)
-            self.protein_resids   += np.unique(self.universe.atoms.select_atoms(
-                "resname {}".format( ' '.join( self.protein_resnames ) )
-                ).resids)
-        self.protein_resnames = list(set( self.protein_resnames ))
-        self.protein_resids   = list(set( self.protein_resids ))
+    def _add_proteins(self):
+        for prot_id, seq in enumerate(self.protein_sequences):
+            protein_residues = get_residuegroup_from_seq(seq, self.universe)
+            self.proteins.append( Protein(prot_id, protein_residues, self.ff, self.bilayerregions) )
 
     def _read_input_and_set_attributes(self, inputfilepath ):
         ''' Reading input file
@@ -175,6 +182,7 @@ class Systeminfo(object):
         self.mdfilespath             = systeminfo.pop("mdfiles")
         self.forcefieldname          = systeminfo.pop("forcefield")
         self._inputfile_times        = systeminfo.pop("timeframe").split(",")
+        self.protein_sequences       = systeminfo.pop("protein_sequences").split(",")
 
         self._check_inputfile(systeminfo)
 
@@ -222,6 +230,34 @@ class Systeminfo(object):
         self.t_start = int( self._inputfile_times[0] )
         self.dt      = max(dt_inp, dt_mda)
         self.t_end   = min(t_end_inp, t_end_mda)
+
+    def _define_bilayer_regions(self):
+        ''' Define borders of regions within bilayer
+            like [ h1/t1, t1/t2, t2/h2, ] from first frame
+            assumed lipid proportions are
+
+              P       |   Head region: 1/4
+              |_      |_____ Total: 2.5 nm
+             /  \     |  Tail region: 3/4
+            /    \    |
+
+        '''
+        pl_resnames = ' '.join(self.pl_resnames)
+        pl_refatomnames = ' '.join(
+            [self.ff.central_atom_of[resname] for resname in self.pl_resnames])
+        pl_refatoms = self.universe.atoms.select_atoms(
+            "resname {} and name {}".format(pl_resnames, pl_refatomnames))
+        zpos_refatms = pl_refatoms.positions[:,2]
+
+        bilayercenter = zpos_refatms.mean()
+        upperavg = zpos_refatms[zpos_refatms >= bilayercenter]
+        loweravg = zpos_refatms[zpos_refatms <  bilayercenter]
+
+        upperborder = (bilayercenter + upperavg * 0.875)  # Tail region + 0.5*headregion
+        lowerborder = (bilayercenter - loweravg * 0.875)  #  3/4        +   0.5 * 1/4
+
+        return [lowerborder, bilayercenter, upperborder]
+
 
 
 class Conv(object):
@@ -273,7 +309,6 @@ class Conv(object):
             leaflet_assignment.append(leaflet)
 
         return dict( zip(resids, leaflet_assignment ) )
-
 
 class Files(object):
     """

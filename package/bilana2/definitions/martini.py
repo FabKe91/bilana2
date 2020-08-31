@@ -31,16 +31,16 @@ TAILS             = ['DP', 'DI', 'DU']
 HEADS             = ['PC']
 STEROLS           = ['CHL1', 'ERG']
 PROTEIN_SEQUENCES = []
-PROTEIN_RESIDUES  = ['VAL', 'GLY', 'ALA', 'ILE', 'LEU', 'CYS', 'ARG', 'HSD']
+AMINO_ACIDS       = ['VAL', 'GLY', 'ALA', 'ILE', 'LEU', 'CYS', 'ARG', 'HSD']
 IONS              = ["CL", "POT", "NA" ]
-WATER             = ["TIP3", "SOL",]
+WATER             = ["TIP3", "SOL"]
 SOLVENTS          = WATER + IONS
 
 # =================================================
 # Glycerolpart, also carbonylpart of FA is included
 # =================================================
 
-GLYCEROLATOMS = ['GL1','GL2', ]
+GLYCEROLATOMS = ['GL1', 'GL2', ]
 
 # =================================================
 # Head atom definition
