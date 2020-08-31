@@ -64,6 +64,8 @@ def create_cc_orderfiles(sysinfo,
             )
 
         for t in range(len_traj):
+            lines_scd = []
+            lines_sprof = []
 
             time = sysinfo.universe.trajectory[t].time
             if not sysinfo.within_timerange(time):
@@ -77,40 +79,47 @@ def create_cc_orderfiles(sysinfo,
             else:
                 new_axis = None
 
-            for res in sysinfo.lipid_resids:
-                LOGGER.debug("At time %s and residue %s", time, res)
+            LOGGER.debug("getting to positions ...")
+            ### Get positions ###
+            residue_atomslist = []
+            for resname in sysinfo.molecules:
+                scd_atmnames = sysinfo.ff.scd_tail_atoms_of(resname)
+                if len(scd_atmnames) == 1:
+                    scd_atmnames = [scd_atmnames]
+                for tailnames in scd_atmnames:
+                    atoms = sysinfo.universe.atoms.select_atoms("resname {} and name {}".format(resname, ' '.join(tailnames)))
+                    residue_atomslist += atoms.split("residue")
+            LOGGER.debug("...finished")
+            LOGGER.debug("%s", residue_atomslist)
 
-                leaflet = sysinfo.convert.resid_to_leaflet[res]
-                resname = sysinfo.convert.resid_to_resname[res]
+
+            for atomslist in residue_atomslist:
+
+                resid = atomslist.resids
+                assert len(set(resid)) == 1
+                resid = resid[0]
+                LOGGER.debug("At time %s and residue %s", time, resid)
+                
+                leaflet = sysinfo.convert.resid_to_leaflet[resid]
+                resname = sysinfo.convert.resid_to_resname[resid]
 
                 if new_axis is not None:
                     new_axis_at_t = new_axis[leaflet]
 
-                if resname not in sysinfo.molecules:
-                    continue
+                order_val, s_prof = get_cc_order(atomslist.positions, ref_axis=new_axis_at_t)
 
-                LOGGER.debug("getting to positions ...")
-                ### Get positions ###
-                tailatms = sysinfo.ff.scd_tail_atoms_of(resname)
-                positions = []
-                for sn in tailatms:
-                    pos = sysinfo.universe.atoms.select_atoms( "resid {} and name {}"\
-                            .format(res, ' '.join(sn) ) ).positions
-                    positions.append(pos)
-
-                order_val, s_prof = get_cc_order(positions, ref_axis=new_axis_at_t)
-
-                LOGGER.debug("printing to files ...")
-                ### Print everything to files ###
-                line_scd = "{: <12.2f}{: <10}{: <10}{: <7}{: <15.8}".format(
-                        time, res, leaflet, resname, order_val)
-                print(line_scd, file=scdfile)
-                for chain_ndx, slist in enumerate(s_prof):
-                    for carb_i, order_carb in enumerate(slist):
-                        line_p = "{: <12.2f}{: <10}{: <10}{: <7}{: <15.8}{: <15.8}{: <10}{: <10}"\
-                            .format(time, res, leaflet, resname,
-                            order_val, order_carb, carb_i, chain_ndx)
-                    print(line_p, file=sprof_file)
+                ### Save lines for printing to files ###
+                line_scd = "{: <12.2f}{: <10}{: <10}{: <7}{: <15.8}\n".format(
+                        time, resid, leaflet, resname, order_val)
+                lines_scd.append(line_scd)
+                for carb_i, order_carb in enumerate(s_prof):
+                    line_p = "{: <12.2f}{: <10}{: <10}{: <7}{: <15.8}{: <15.8}{: <10}\n"\
+                        .format(time, resid, leaflet, resname,
+                        order_val, order_carb, carb_i)
+                    lines_sprof.append(line_p)
+            LOGGER.debug("printing to files ...")
+            sprof_file.write(''.join(lines_sprof))
+            scdfile.write(''.join(lines_scd))
 
 def get_cc_order(positions: [np.array,], ref_axis=(0,0,1)) -> float:
     ''' Calculate the cc order parameter
@@ -126,27 +135,21 @@ def get_cc_order(positions: [np.array,], ref_axis=(0,0,1)) -> float:
 
 
     '''
-    assert isinstance(positions, list)
+    s_vals = []
 
-    s_vals = [[] for _ in positions]
+    for i in range( len(positions) - 1 ):# Explicitly using range(len()) to save if clause
 
-    for sn_x, positions_sn_x in enumerate(positions):
+        pos1, pos2 = positions[i], positions[i+1]
 
-        #scds_of_atoms = []
-        for i in range( len(positions_sn_x) - 1 ):# Explicitly using range(len()) to save if clause
+        diffvector = pos2 - pos1
+        diffvector /= np.linalg.norm(diffvector)
 
-            pos1, pos2 = positions_sn_x[i], positions_sn_x[i+1]
+        cos_angle = np.dot(diffvector, ref_axis)
+        #scds_of_atoms.append( 0.5 * ( ( 3 * (cos_angle**2)) - 1 )  )
+        s_vals.append( 0.5 * ( ( 3 * (cos_angle**2)) - 1 )  )
 
-            diffvector = pos2 - pos1
-            diffvector /= np.linalg.norm(diffvector)
-
-            cos_angle = np.dot(diffvector, ref_axis)
-            #scds_of_atoms.append( 0.5 * ( ( 3 * (cos_angle**2)) - 1 )  )
-            s_vals[sn_x].append( 0.5 * ( ( 3 * (cos_angle**2)) - 1 )  )
-
-            LOGGER.debug("Diffvector %s", diffvector)
-            LOGGER.debug("Resulting cos %s", cos_angle)
-        s_vals[sn_x] = np.array( s_vals[sn_x] )
+        LOGGER.debug("Diffvector %s", diffvector)
+        LOGGER.debug("Resulting cos %s", cos_angle)
 
     return np.array(s_vals).mean(), s_vals
 
