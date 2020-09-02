@@ -26,7 +26,7 @@
 # be sure everything was properly added
 # =====================================================
 
-TAILS             = ['DP', 'DM', 'DS', 'DO', 'DY', 'DU', 'PO', 'PL']
+TAILS             = ['DP', 'DM', 'DS', 'DO', 'DY', 'DU', 'PO', 'PL', 'YO']
 HEADS             = ['PC', 'PE', 'PS', 'PI', 'PA']
 STEROLS           = ['CHL1', 'CHIM', 'CH0M', 'ERG', 'ch1m']
 #PROTEIN_SEQUENCES = ['WSC1', ]
@@ -82,7 +82,9 @@ TAILCARBONS = {
     'PO':[['C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C28', 'C29', 'C210', 'C211', 'C212', 'C213', 'C214', 'C215', 'C216', 'C217', 'C218'],  #18:1
           ['C32', 'C33', 'C34', 'C35', 'C36', 'C37', 'C38', 'C39', 'C310', 'C311', 'C312', 'C313', 'C314', 'C315', 'C316']],                 #16:0
     'DO':[['C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C28', 'C29', 'C210', 'C211', 'C212', 'C213', 'C214', 'C215', 'C216', 'C217', 'C218'],  #18:1
-          ['C32', 'C33', 'C34', 'C35', 'C36', 'C37', 'C38', 'C39', 'C310', 'C311', 'C312', 'C313', 'C314', 'C315', 'C316', 'C317', 'C318']], #18:1
+         ['C32', 'C33', 'C34', 'C35', 'C36', 'C37', 'C38', 'C39', 'C310', 'C311', 'C312', 'C313', 'C314', 'C315', 'C316', 'C317', 'C318']],  #18:1
+    'YO':[['C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C28', 'C29', 'C210', 'C211', 'C212', 'C213', 'C214', 'C215', 'C216', 'C217', 'C218'],  #18:1
+          ['C32', 'C33', 'C34', 'C35', 'C36', 'C37', 'C38', 'C39', 'C310', 'C311', 'C312', 'C313', 'C314', 'C315', 'C316',]],                #16:1
     }
 
 TAILHYDROGENS = {
@@ -110,7 +112,7 @@ TAILHYDROGENS = {
                 'H14Y','H15X', 'H15Y','H16X', 'H16Y','H16Z']],
     'PL':[['H2R', 'H2S','H3R', 'H3S', 'H4R', 'H4S', 'H5R', 'H5S', 'H6R', 'H6S','H7R','H7S','H8R',
                 'H8S', 'H9R', 'H10R', 'H11R', 'H11S', 'H12R', 'H13R',
-                'H14R', 'H14S', 'H15R', 'H15S','H16R', 'H16S', 'H17X', 'H17Y', 'H18X', 'H18Y', 'H18Z'],
+                'H16R', 'H14S', 'H15R', 'H15S','H16R', 'H16S', 'H17X', 'H17Y', 'H18X', 'H18Y', 'H18Z'],
              ['H2X', 'H2Y','H3X', 'H3Y','H4X', 'H4Y','H5X', 'H5Y', 'H6X', 'H6Y','H7X', 'H7Y','H8X',
                 'H8Y','H9X', 'H9Y','H10X', 'H10Y','H11X', 'H11Y','H12X', 'H12Y', 'H13X', 'H13Y','H14X',
                 'H14Y','H15X', 'H15Y','H16X', 'H16Y','H16Z']],
@@ -126,6 +128,12 @@ TAILHYDROGENS = {
              ['H2X', 'H2Y','H3X', 'H3Y','H4X', 'H4Y','H5X', 'H5Y', 'H6X', 'H6Y','H7X', 'H7Y','H8X',
                 'H8Y','H9X', 'H10X', 'H11X', 'H11Y','H12X', 'H12Y', 'H13X', 'H13Y','H14X',
                 'H14Y','H15X', 'H15Y','H16X', 'H16Y','H17X', 'H17Y', 'H18X', 'H18Y', 'H18Z']],
+    'YO':[['H2R', 'H2S','H3R', 'H3S', 'H4R', 'H4S', 'H5R', 'H5S', 'H6R', 'H6S','H7R','H7S','H8R',
+                'H8S', 'H9R', 'H10R', 'H11R', 'H11S', 'H12R', 'H12S','H13R', 'H13S',
+                'H14R', 'H14S', 'H15R', 'H15S','H16R', 'H16S', 'H17R', 'H17S', 'H118R', 'H18S', 'H18T'],
+             ['H2X', 'H2Y','H3X', 'H3Y','H4X', 'H4Y','H5X', 'H5Y', 'H6X', 'H6Y','H7X', 'H7Y','H8X',
+                'H8Y','H9X', 'H10X', 'H11X', 'H11Y','H12X', 'H12Y', 'H13X', 'H13Y','H14X',
+                'H14Y','H15X', 'H15Y','H16X', 'H16Y','H16Z']],
     }
 
 TAIL_ATOMS_OF = {
@@ -137,6 +145,7 @@ TAIL_ATOMS_OF = {
     'DU':[TAILCARBONS['DU'][0], TAILHYDROGENS['DU'][0], TAILCARBONS['DU'][1], TAILHYDROGENS['DU'][1],],
     'PO':[TAILCARBONS['PO'][0], TAILHYDROGENS['PO'][0], TAILCARBONS['PO'][1], TAILHYDROGENS['PO'][1],],
     'PL':[TAILCARBONS['PL'][0], TAILHYDROGENS['PL'][0], TAILCARBONS['PL'][1], TAILHYDROGENS['PL'][1],],
+    'YO':[TAILCARBONS['YO'][0], TAILHYDROGENS['YO'][0], TAILCARBONS['YO'][1], TAILHYDROGENS['YO'][1],],
 
     #### The entries for sterols should be complete *with* hydrogens and [head atoms]+[tail atoms] ###
     #### should be a list of all atoms in a sterol molecule ###
@@ -162,6 +171,8 @@ SCD_TAIL_ATOMS_OF = {
     'PO':[['C22', 'C24', 'C26', 'C28', 'C211', 'C213', 'C215', 'C217'], TAILCARBONS['PO'][1][::2]],
     'DO':[['C22', 'C24', 'C26', 'C28', 'C211', 'C213', 'C215', 'C217'],  # Double bonds between 9-10
             ['C32', 'C34', 'C36', 'C38', 'C311', 'C313', 'C315', 'C317']],
+    'YO':[['C22', 'C24', 'C26', 'C28', 'C211', 'C213', 'C215', 'C217'],  # Double bonds between 9-10
+            ['C32', 'C34', 'C36', 'C38', 'C311', 'C313', 'C315',]],      # Double bonds between 9-10
     'CHL1':[['C3', 'C17']],
     'ch1m':[['C20', 'C12']],
     'CHIM':[['C20', 'C12']],
@@ -187,7 +198,7 @@ CENTRAL_ATOM_OF = {
 # Protein specific definitions
 # ====================================================
 
-AMINO_ACIDS = ["ALA", "ARG", "ASN", "ASP", "ASX", "CYS", "GLU", "GLN", "GLX", "GLY", "HIS",
+AMINO_ACIDS = ["ALA", "ARG", "ASN", "ASP", "ASX", "CYS", "GLU", "GLN", "GLX", "GLY", "HSD",
       "ILE", "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "TRP", "TYR", "VAL",
       "PROT", "AA", "protein"
 ]
@@ -196,30 +207,26 @@ AA_BACKBONE = ["N", "HN", "CA", "HA", "C"]
 
 AA_SIDECHAINS = {
             "ALA":["CB", "HB1", "HB2", "HB3"],
-            "ARG":raise KeyError,
-            "ASN":raise KeyError,
-            "ASP":raise KeyError,
-            "ASX":raise KeyError,
-            "CYS":raise KeyError,
-            "GLU":raise KeyError,
-            "GLN":raise KeyError,
-            "GLX":raise KeyError,
-            "GLY":raise KeyError,
-            "HIS":raise KeyError,
-            "ILE":raise KeyError,
-            "LEU":raise KeyError,
-            "LYS":raise KeyError,
-            "MET":raise KeyError,
-            "PHE":raise KeyError,
-            "PRO":raise KeyError,
-            "SER":raise KeyError,
-            "THR":raise KeyError,
-            "TRP":raise KeyError,
-            "TYR":raise KeyError,
-            "VAL":raise KeyError,
+            "ARG":None,
+            "ASN":None,
+            "ASP":None,
+            "ASX":None,
+            "CYS":None,
+            "GLU":None,
+            "GLN":None,
+            "GLX":None,
+            "GLY":None,
+            "HSD":None,
+            "ILE":None,
+            "LEU":None,
+            "LYS":None,
+            "MET":None,
+            "PHE":None,
+            "PRO":None,
+            "SER":None,
+            "THR":None,
+            "TRP":None,
+            "TYR":None,
+            "VAL":None,
 }
 
-#RESNAME_SEQUENCE_OF_PROTEIN = {
-#    "WSC1":[ 'A NVGAI VGGVV GGVVG AVAIA LCILL IVRHI N' ],
-#    }
-#
