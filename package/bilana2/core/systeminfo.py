@@ -11,7 +11,7 @@ import logging
 import numpy as np
 import MDAnalysis as mda
 
-from .core.protein import Protein, get_residuegroup_from_seq
+from .protein import Protein, get_residuegroup_from_seq
 from ..lib import common as cm
 from .forcefields import Forcefield
 
@@ -85,12 +85,6 @@ class Systeminfo(object):
         self.universe = mda.Universe(self.path.gro, self.path.trj)
         self.convert  = Conv(self.universe, self.ff, self.molecules)
 
-        # ===========================================
-        # Store geometric information
-        # ===========================================
-
-        self.bilayerregions = self._define_bilayer_regions()
-
         # ==============================================================
         #  Set the times from input file or gathered from mda.Universe
         # ==============================================================
@@ -124,21 +118,26 @@ class Systeminfo(object):
         self._check_if_all_molecules_found()
 
         # ===========================================
+        # Store geometric information
+        # ===========================================
+
+        self.bilayerregions = self._define_bilayer_regions()
+
+        # ===========================================
         # Store information about proteins in system
         # ===========================================
 
         self.proteins = []
-        self.n_proteins = len(self.protein_sequences)
-
-        if self.protein_sequences:
+        if self.protein_sequences and '' not in self.protein_sequences:
             self._add_proteins()
+        self.n_proteins = len(self.protein_sequences)
 
 
     def within_timerange(self, time):
         return (self.t_start <= time <= self.t_end) and (time % self.dt == 0)
 
     def _check_if_all_molecules_found(self):
-        found_lipids = self.pl_resnames + self.sterol_resnames + self.protein_resnames
+        found_lipids = self.pl_resnames + self.sterol_resnames
         not_found    = list(set(self.molecules) - set(found_lipids))
         if not_found:
             raise ValueError("Not all lipids given in inputfile found in structure file! Incorrect name?\n"\
@@ -150,8 +149,8 @@ class Systeminfo(object):
             ).resids))
 
     def _add_proteins(self):
-        for prot_id, seq in enumerate(self.protein_sequences):
-            protein_residues = get_residuegroup_from_seq(seq, self.universe)
+        protein_grps = get_residuegroup_from_seq(self.protein_sequences, self.universe)
+        for prot_id, protein_residues in enumerate(protein_grps):
             self.proteins.append( Protein(prot_id, protein_residues, self.ff, self.bilayerregions) )
 
     def _read_input_and_set_attributes(self, inputfilepath ):
@@ -244,14 +243,14 @@ class Systeminfo(object):
         '''
         pl_resnames = ' '.join(self.pl_resnames)
         pl_refatomnames = ' '.join(
-            [self.ff.central_atom_of[resname] for resname in self.pl_resnames])
+            [self.ff.central_atom_of(resname) for resname in self.pl_resnames])
         pl_refatoms = self.universe.atoms.select_atoms(
             "resname {} and name {}".format(pl_resnames, pl_refatomnames))
         zpos_refatms = pl_refatoms.positions[:,2]
 
         bilayercenter = zpos_refatms.mean()
-        upperavg = zpos_refatms[zpos_refatms >= bilayercenter]
-        loweravg = zpos_refatms[zpos_refatms <  bilayercenter]
+        upperavg = zpos_refatms[zpos_refatms >= bilayercenter].mean()
+        loweravg = zpos_refatms[zpos_refatms <  bilayercenter].mean()
 
         upperborder = (bilayercenter + upperavg * 0.875)  # Tail region + 0.5*headregion
         lowerborder = (bilayercenter - loweravg * 0.875)  #  3/4        +   0.5 * 1/4

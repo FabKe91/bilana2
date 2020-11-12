@@ -230,3 +230,34 @@ def create_neibcount_file(sysinfo, neighborlist, outputfilename="neighborcount.d
                 outpline = "{: <15}{: <10}{: <15}".format(time, res, resname)
                 outpline += (len(sysinfo.molecules)*"{: ^7}").format(*neib_comp_list)
                 print(outpline, file=outf)
+
+def write_neighbortype_distr(systeminfo, neighbor_info_file="neighbor_info", fname="neighbortype_distribution.dat"):
+    '''
+        Creates datafile < fname > with columns:
+        < time >  < residue > < resname > < N comp 1 > < N comp 2 > ... < N comp i >
+    '''
+    neiblist = get_neighbor_dict(neighbor_info_file)
+    components = systeminfo.molecules
+    with open(fname, "w") as outf:
+        print("{: <12}{: <10}{: <10}{: <10}".format("time", "resid", "leaflet", "resname")\
+            + (len(components)*'{: ^7}').format(*components),
+            file=outf)
+
+        for time, residdict in neiblist.items():
+            if not systeminfo.within_timerange(time):
+                continue
+            LOGGER.info("At time %s", time)
+
+            for resid, neibs in residdict.items():
+                lipidtype = systeminfo.convert.resid_to_resname[resid]
+                leaflet = systeminfo.convert.resid_to_leaflet[resid]
+
+                neib_comp_list = []
+                for lip in components:
+                    ncomp = [systeminfo.convert.resid_to_resname[N] for N in neibs].count(lip)
+                    neib_comp_list.append(ncomp)
+
+                print("{: <12}{: <10}{: <10}{: <7}".format(time, resid, leaflet, lipidtype)\
+                    + (len(neib_comp_list)*'{: ^7}').format(*neib_comp_list),
+                    file=outf)
+

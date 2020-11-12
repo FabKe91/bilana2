@@ -63,6 +63,21 @@ def create_cc_orderfiles(sysinfo,
             file=sprof_file
             )
 
+        LOGGER.debug("getting to atoms ...")
+        ### Get positions ###
+        residue_atomslist = []
+        for resname in sysinfo.molecules:
+            scd_atmnames = sysinfo.ff.scd_tail_atoms_of(resname)
+            #if len(scd_atmnames) == 1:
+            #    scd_atmnames = [scd_atmnames]
+            for tailnames in scd_atmnames:
+                LOGGER.debug("tailnames %s", tailnames)
+                atoms = sysinfo.universe.atoms.select_atoms("resname {} and name {}".format(resname, ' '.join(tailnames)))
+                residue_atomslist += atoms.split("residue")
+        LOGGER.debug("...finished")
+        LOGGER.debug("%s", residue_atomslist)
+
+
         for t in range(len_traj):
             lines_scd = []
             lines_sprof = []
@@ -78,19 +93,6 @@ def create_cc_orderfiles(sysinfo,
                 LOGGER.debug("Corrected angle %s", new_axis)
             else:
                 new_axis = None
-
-            LOGGER.debug("getting to positions ...")
-            ### Get positions ###
-            residue_atomslist = []
-            for resname in sysinfo.molecules:
-                scd_atmnames = sysinfo.ff.scd_tail_atoms_of(resname)
-                if len(scd_atmnames) == 1:
-                    scd_atmnames = [scd_atmnames]
-                for tailnames in scd_atmnames:
-                    atoms = sysinfo.universe.atoms.select_atoms("resname {} and name {}".format(resname, ' '.join(tailnames)))
-                    residue_atomslist += atoms.split("residue")
-            LOGGER.debug("...finished")
-            LOGGER.debug("%s", residue_atomslist)
 
 
             for atomslist in residue_atomslist:
