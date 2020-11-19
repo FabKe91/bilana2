@@ -27,9 +27,6 @@ def calculate_overlapscore(sysinfo, refsel, chainsel,
             <time> <resid> <thickness> <overlap> <chunksize>
     '''
     LOGGER.setLevel(loglevel)
-    resids = []
-    overlaps = []
-    chunksizes = []
     chunkframes = []
     u = sysinfo.universe
 
@@ -39,7 +36,13 @@ def calculate_overlapscore(sysinfo, refsel, chainsel,
         raise ValueError('chainsel "{}" never matches any atoms'.format(refsel))
 
     for ts in u.trajectory:
+
+        resids = []
+        overlaps = []
+        chunksizes = []
+
         time = ts.time
+
         if not sysinfo.within_timerange(time):
             continue
         LOGGER.info("At %s ps", time)
