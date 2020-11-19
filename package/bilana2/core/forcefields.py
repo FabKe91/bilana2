@@ -42,7 +42,7 @@ class Forcefield(object):
     def is_sterol(self, resname):
         return resname in self._ff.STEROLS
     def is_protein(self, resname):
-        return resname in self._ff.PROTEIN_SEQUENCES
+        return resname in self._ff.AMINO_ACIDS
     def is_water(self, resname):
         return resname in self._ff.WATER
 
@@ -51,7 +51,7 @@ class Forcefield(object):
         if self.is_sterol(resname):
             return self._ff.CENTRAL_ATOM_OF[resname]
         elif self.is_protein(resname):
-            return 'N'
+            return self._ff.CENTRAL_ATOM_OF["AA"]
         else:
             head = resname[-2:]
             return self._ff.CENTRAL_ATOM_OF[head]

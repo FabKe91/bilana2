@@ -186,7 +186,7 @@ def get_neighbor_dict(neighborfilename='neighbor_info'):
 
     neibdict = {}
 
-    data = pd.read_table(neighborfilename, delim_whitespace=True)
+    data = pd.read_table(neighborfilename, sep="\s+")
     data["nlist"] = data.fillna('').List_of_Neighbors\
         .apply(lambda x: [int(i) for i in x.split(',') if i ])
     data = data.drop( columns=["Number_of_neighbors", "List_of_Neighbors"] )
