@@ -6,6 +6,6 @@ from .core import protein
 from .core.energy import Energy
 
 from .lib import files
-from .lib import gromacswrapper as _gmx
+from .lib import gromacswrapper as gmx
 
 from . import analysis
