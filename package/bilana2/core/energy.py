@@ -1004,3 +1004,4 @@ def add_leaflet_groups_to_index(sysinfo, add_grp_to="resindex_all.ndx"):
     with open(outputsel, "r") as selectionf, open(add_grp_to, "a") as ndxf:
         for line in selectionf:
             ndxf.write(line)
+

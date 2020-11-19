@@ -45,7 +45,7 @@ def calc_density(systeminfo, selstr, outname="density.xvg", overwrite=False, **k
     ####
     LOGGER.info("Run gmx density...")
     ####
-    commandstring = "-f {} -s {} -n {} -o {}  -d Z -b {} -e {}".format(TRJ, TPR, NDX, OUT, systeminfo.t_start, systeminfo.t_end)
+    commandstring = "-f {} -s {} -n {} -o {}  -d Z -b {} -e {}".format(TRJ, TPR, NDX, OUT, str(systeminfo.t_start), str(systeminfo.t_end))
     cmd = commandstring.split() + additional_input
     out, err = exec_gromacs(GMXNAME, "density", cmd)
     write_log("gmx_density", out, err, path=systeminfo.path.log)
