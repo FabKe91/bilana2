@@ -61,9 +61,11 @@ def create_eofs(outputfile="EofScd{}.csv",
     ### neighbortype:   time   host   resname   Neibs_Type1 Neibs_Type2 ...
     ### neighbor info:  time   host             nlist
 
-    ###remove duplicate entries (E_12 == E_21) ###
-    LOGGER.info("remove duplicate entries from energy...")
-    energy = energy[energy.host < energy.neib]
+    ### !!! CHANGED THAT HERE !!! ###
+    ### !!! NOW DUPLICATE ENTRIES ARE USED SO E_12 != E_21 !!! ###
+    ####remove duplicate entries (E_12 == E_21) ###
+    #LOGGER.info("remove duplicate entries from energy...")
+    #energy = energy[energy.host < energy.neib]
 
     ### Removing entries where pair is not within cutoff distance ###
     LOGGER.info("remove non-neighbor cutoff pairs from energy...")
