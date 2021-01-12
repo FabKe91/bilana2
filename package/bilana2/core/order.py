@@ -55,8 +55,8 @@ def create_cc_orderfiles(sysinfo,
     with open(outputfile_scd, "w") as scdfile, open(outputfile_s_profile, "w") as sprof_file:
 
         #### Print header files ####
-        print("{: <12}{: <10}{: <10}{: <10}{: <15}"\
-                .format("time", "resid", "leaflet", "resname", "Scd"),
+        print("{: <12}{: <10}{: <10}{: <10}{: <10}{: <15}"\
+                .format("time", "resid", "chainid", "leaflet", "resname", "Scd"),
             file=scdfile)
         print("{: <12}{: <10}{: <10}{: <10}{: <15}{: <15}{: <10}{: <10}"\
             .format("time", "resid", "leaflet", "resname", "avgS", "S", "carbon", "chain" ),
@@ -95,7 +95,7 @@ def create_cc_orderfiles(sysinfo,
                 new_axis = None
 
 
-            for atomslist in residue_atomslist:
+            for chainid, atomslist in enumerate(residue_atomslist):
 
                 resid = atomslist.resids
                 assert len(set(resid)) == 1
@@ -111,8 +111,8 @@ def create_cc_orderfiles(sysinfo,
                 order_val, s_prof = get_cc_order(atomslist.positions, ref_axis=new_axis_at_t)
 
                 ### Save lines for printing to files ###
-                line_scd = "{: <12.2f}{: <10}{: <10}{: <7}{: <15.8}\n".format(
-                        time, resid, leaflet, resname, order_val)
+                line_scd = "{: <12.2f}{: <10}{: <10}{: <10}{: <7}{: <15.8}\n".format(
+                        time, resid, chainid, leaflet, resname, order_val)
                 lines_scd.append(line_scd)
                 for carb_i, order_carb in enumerate(s_prof):
                     line_p = "{: <12.2f}{: <10}{: <10}{: <7}{: <15.8}{: <15.8}{: <10}\n"\
