@@ -79,7 +79,7 @@ class Energy(Systeminfo):
 
         LOGGER.info('\n Calculating for energygroups: %s', self.molparts)
 
-    def run_calculation(self, resids):
+    def run_calculation(self, resids, ntasks=1, ntomp=2):
         ''' Runs an energy calculation with settings from Energy() instance.
             For each residue the energy to all neighbors seen during MD is calculated
             and written to .edr files.
@@ -153,7 +153,7 @@ class Energy(Systeminfo):
                     LOGGER.info("Edrfile for lipid %s part %s already exists."
                                 "Will skip this calculation.", res, groupfragment)
                 else:
-                    self.do_Energyrun(res, groupfragment, tprout, energyf_output)
+                    self.do_Energyrun(res, groupfragment, tprout, energyf_output, ntomp=ntomp, ntasks=ntasks)
                 if os.path.isfile(g_energy_output) and not self.overwrite:
                     LOGGER.info("Xvgtable for lipid %s part %s already exists."
                                 "Will skip this calculation.", res, groupfragment)
@@ -163,7 +163,7 @@ class Energy(Systeminfo):
                         tprout_self, relev_energies_self, xvg_out_self)
         return 1
 
-    def run_lip_leaflet_interaction(self, resids):
+    def run_lip_leaflet_interaction(self, resids, ntomp=2, ntasks=1):
         ''' Run the energy calculation between each lipid and the opposing leaflet  '''
         LOGGER.info('Rerunning MD for energyfiles')
 
@@ -234,7 +234,7 @@ class Energy(Systeminfo):
                 LOGGER.info("Edrfile for lipid %s part %s already exists. "
                             "Will skip this calculation.", res, self.part)
             else:
-                self.do_Energyrun(res, 0, tprout, energyf_output)
+                self.do_Energyrun(res, 0, tprout, energyf_output, ntomp=ntomp, ntasks=ntasks)
             if os.path.isfile(g_energy_output) and not self.overwrite:
                 LOGGER.info("Xvgtable for lipid %s part %s already exists. "
                             "Will skip this calculation.", res, self.part)
@@ -297,7 +297,7 @@ class Energy(Systeminfo):
 
         write_log("gmx_grompp", out, err, path=self.path.log)
 
-    def do_Energyrun(self, res, groupfragment, tprrerun_in, energyf_out):
+    def do_Energyrun(self, res, groupfragment, tprrerun_in, energyf_out, ntomp=2, ntasks=1):
         ''' Create .edr ENERGYFILE with mdrun -rerun '''
         LOGGER.info('...Rerunning trajectory for energy calculation...')
 
@@ -310,6 +310,7 @@ class Energy(Systeminfo):
 
         mdrun_arglist = ['-s', tprrerun_in, '-rerun', self.path.trj,
                          '-e', energyf_out, '-o', trajout,'-g', logoutput_file,
+                         '-ntomp', str(ntomp), '-ntmpi', str(ntasks),
                         ]
         out, err = exec_gromacs(GMXNAME, "mdrun", mdrun_arglist)
 
