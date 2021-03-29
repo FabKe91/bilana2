@@ -6,6 +6,8 @@
         - get_neighbor_dict     Reads neighbor file created in write_neighbor_info and returns
                                 a dictionary for easy handling
         - create_neibcount_file Creates a file with number of neighbor of each type
+        - write_neighbortype_distr Creates a file that specifies type of each residue
+
     ==========================================================================================
 '''
 
@@ -231,12 +233,11 @@ def create_neibcount_file(sysinfo, neighborlist, outputfilename="neighborcount.d
                 outpline += (len(sysinfo.molecules)*"{: ^7}").format(*neib_comp_list)
                 print(outpline, file=outf)
 
-def write_neighbortype_distr(systeminfo, neighbor_info_file="neighbor_info", fname="neighbortype_distribution.dat"):
+def write_neighbortype_distr(systeminfo, neiblist, fname="neighbortype_distribution.dat"):
     '''
         Creates datafile < fname > with columns:
         < time >  < residue > < resname > < N comp 1 > < N comp 2 > ... < N comp i >
     '''
-    neiblist = get_neighbor_dict(neighbor_info_file)
     components = systeminfo.molecules
     with open(fname, "w") as outf:
         print("{: <12}{: <10}{: <10}{: <10}".format("time", "resid", "leaflet", "resname")\
