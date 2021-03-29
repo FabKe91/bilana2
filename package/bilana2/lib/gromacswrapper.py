@@ -111,5 +111,5 @@ def write_log(name_specifier, stdout, stderr, path="."):
 
 
 
-GMXNAME = find_executable("gmx")
+GMXNAME = find_executable("gmx_mpi")
 

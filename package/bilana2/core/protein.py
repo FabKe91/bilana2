@@ -42,7 +42,7 @@ LETTERCODE_3to1 = {
 LETTERCODE_1to3 = dict( reversed(item) for item in LETTERCODE_3to1.items() )
 
 
-def get_residuegroup_from_seq(protein_sequences, universe: mda.Universe) -> mda.residues:
+def get_residuegroup_from_seq(protein_sequences, universe: mda.Universe) -> mda.ResidueGroup:
     ''' Returns group of mda.residues for specified 1-lettercoded protein sequence
         input:
             protein_sequences: 1-letter-coded AA sequence that are found in system

@@ -11,7 +11,7 @@ import logging
 import numpy as np
 import MDAnalysis as mda
 
-from .core.protein import Protein, get_residuegroup_from_seq
+from .protein import Protein, get_residuegroup_from_seq
 from ..lib import common as cm
 from .forcefields import Forcefield
 
