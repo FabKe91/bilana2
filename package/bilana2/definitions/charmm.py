@@ -28,7 +28,7 @@
 
 TAILS             = ['DP', 'DM', 'DS', 'DO', 'DY', 'DU', 'PO', 'PL', 'YO']
 HEADS             = ['PC', 'PE', 'PS', 'PI', 'PA']
-STEROLS           = ['CHL1', 'CHIM', 'CH0M', 'ERG', 'ch1m']
+STEROLS           = ['CHL1', 'CHIM', 'CH0M', 'ERG', 'ch1m', "CHIL"]
 #PROTEIN_SEQUENCES = ['WSC1', ]
 AMINO_ACIDS       = ['VAL', 'GLY', 'ALA', 'ILE', 'LEU', 'CYS', 'ARG', 'HSD']
 IONS              = ["CL", "POT", "NA" ]
@@ -58,6 +58,7 @@ HEAD_ATOMS_OF = {
     #### should be a list of all atoms in a sterol molecule ###
     'CHL1':['O3', 'C1', 'C2', 'C3', 'C4', 'C5', 'C10'],
     'CHIM':['C20', "C1", "C2", "N1", "N2"],
+    'CHIL':['C20', "C1", "C2", "N1", "N2"],
     'CH0M':['C20', "C1", "C2", "N1", "N2"],
     'ERG':['O3', 'C1', 'C2', 'C3', 'C4', 'C5', 'C10'],
     }
@@ -152,6 +153,7 @@ TAIL_ATOMS_OF = {
     'CHL1':[['C13', 'C14', 'C15', 'C16', 'C17', 'C20', 'C22', 'C23', 'C24', 'C25']],
     'ERG':[['C13', 'C14', 'C15', 'C16', 'C17', 'C20', 'C22', 'C23', 'C24', 'C25']],
     'CHIM':[['C12', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C28', 'C29', 'C30']],
+    'CHIL':[['C12', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C28', 'C29', 'C30']],
     'CH0M':[['C12', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C28', 'C29', 'C30']],
     }
 
@@ -176,6 +178,7 @@ SCD_TAIL_ATOMS_OF = {
     'CHL1':[['C3', 'C17']],
     'ch1m':[['C20', 'C12']],
     'CHIM':[['C20', 'C12']],
+    'CHIL':[['C20', 'C12']],
     'CH0M':[['C20', 'C12']],
     'ERG':[['C3', 'C17']],
     }
@@ -188,6 +191,7 @@ CENTRAL_ATOM_OF = {
     'PA':'P',
     'CHL1':'O3',
     'CHIM':'C20',
+    'CHIL':'C20',
     'CH0M':'C20',
     'ch1m':'C20',
     'ERG':'O3',
