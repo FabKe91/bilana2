@@ -44,8 +44,7 @@ def create_eofs(outputfile="EofScd{}.csv",
     neibmap = pd.read_table(neighborinfofile, sep="\s+")
     colnames = ["time", "resid", "Number_of_neighbors", "List_of_Neighbors"]
     compare_cols(colnames, neibmap.columns)
-
-
+    
     LOGGER.info("editing names...")
     ### Edit names | From here on work with new column list ! ###
     neibmap["nlist"] = neibmap.fillna('').List_of_Neighbors\
@@ -74,7 +73,6 @@ def create_eofs(outputfile="EofScd{}.csv",
     for res, nlist in zip(energy.neib, energy.nlist):
         mask.append(res in nlist)
     energy = energy[mask].drop(columns=["nlist"])
-    del neibmap
 
     ### Frames okay? ###
     LOGGER.debug("neib:\n%s", neib)
@@ -85,27 +83,52 @@ def create_eofs(outputfile="EofScd{}.csv",
 
     s_dict    = order.filter(["time", "host",  "host_Scd"])\
             .set_index(["time", "host"]).to_dict()["host_Scd"]
-    resn_dict = order.filter(["time", "host", "host_type"])\
-            .set_index(["time", "host"]).to_dict()["host_type"]
+    resn_dict = order.filter(["host", "host_type"])\
+            .set_index("host").to_dict()["host_type"]
 
     ### Merging ###
     LOGGER.info("merging files...")
 
     order  = order.merge(neib, on=["time", "host", "host_type"])
-    del neib
     final = energy.merge(order, on=["time", "host"])
+    final = final.merge(order.rename(columns={"host":"neib", "host_type":"neib_type", "host_Scd":"neib_Scd"}), on=["time", "neib"],suffixes=("_host", "_neib") ) # create neib_Scd and neib_type entries
+    #final = final.merge(neib.rename(columns={"host":"neib", "host_type":"neib_type", }), on=["time", "neib", "neib_type"], ) # create neighborhood of neib entries 
+    del neib
     del order
     del energy
-    final["neib_Scd"]  =  pd.Series(zip(final.time, final.neib)).map(s_dict)
-    final["neib_type"] =  pd.Series(zip(final.time, final.neib)).map(resn_dict)
+    #final["neib_Scd"]  =  pd.Series(zip(final.time, final.neib)).map(s_dict)
+    #final["neib_type"] =  pd.Series(zip(final.time, final.neib)).map(resn_dict)
 
     final["DeltaScd"] = np.abs(final.host_Scd - final.neib_Scd)
     final["AvgScd"]   = ( final.host_Scd + final.neib_Scd ) / 2
 
-    LOGGER.info("writing to csv...")
+    ### get Ncb entry ###
+    if "CHL1" in final.host_type.unique() or "CHL1" in final.neib_type.unique():
+        final = final.merge(neibmap.rename(columns={"nlist":"host_nlist"}), on=["time", "host"])
+        final = final.merge(neibmap.rename(columns={"host":"neib", "nlist":"neib_nlist"}), on=["time", "neib"])
 
-    for grpname, fr in final.groupby(["host_type", "neib_type"]):
-        fr.to_csv( outputfile.format( '_'.join(grpname) ), index=False )
+        final["neibs"] = final.apply(lambda col: tuple(sorted(set(col["neib_nlist"] + col["host_nlist"]) - {col["host"]} - {col["neib"]} )), axis=1)
+        final["neibs_both"] = final.apply(lambda col: tuple(sorted(set(col["neib_nlist"]) & set(col["host_nlist"]))), axis=1)
+
+        final["neibl_type"]      = final.apply(lambda col: [resn_dict[i] for i in col["neibs"] ] , axis=1)
+        final["neibl_type_both"] = final.apply(lambda col: [resn_dict[i] for i in col["neibs_both"] ] , axis=1)
+
+        final["CHL1"] = final.apply(lambda col: col["neibl_type"].count("CHL1") , axis=1)
+        final["CHL1_both"] = final.apply(lambda col: col["neibl_type_both"].count("CHL1") , axis=1)
+
+        final = final.drop(columns=["host_nlist", "neib_nlist", "neibs", "neibs_both", "neibl_type", "neibl_type_both"])
+
+    else:
+        final["CHL1"] = 0
+        final["CHL1_both"] = 0
+
+    final["pair"] = np.array(['_'.join(i) for i in np.sort(final[["host_type", "neib_type"]].values, axis=1,)[:,::-1]])
+
+    LOGGER.info("writing to csv...")
+    print(final)
+
+    for pairname, fr in final.groupby(["pair"]):
+        fr.to_csv( outputfile.format( pairname ), index=False )
 
 
 def create_nofs(outputfile="NofScd.csv",
