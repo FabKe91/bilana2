@@ -45,7 +45,7 @@ def find_executable(executable, path=None):
                     return f
     raise LookupError("No Gromacs executable found")
 
-def exec_gromacs(gmx, gmxlib, inpargs, interactive=None):
+def exec_gromacs(gmx, gmxlib, inpargs, interactive=None, backup=True):
     '''
         Execute Gromacs commands.
         cmd variable stores the actual terminal command (can be anything,
@@ -55,10 +55,15 @@ def exec_gromacs(gmx, gmxlib, inpargs, interactive=None):
         if a command needs user input (STDIN, like in gmx make_ndx) inp_str can be parsed
         as string
     '''
+    if backup:
+        backup_flag = "-backup"
+    else:
+        backup_flag = "-nobackup"
+
     if isinstance(inpargs, list):
-        cmd = [gmx, gmxlib, *inpargs]
+        cmd = [gmx, backup_flag, "-nocopyright", gmxlib, *inpargs]
     elif isinstance(inpargs, dict):
-        cmd = [gmx, gmxlib, *[i for tup in inpargs.items() for i in tup]]
+        cmd = [gmx, backup_flag, "-nocopyright", gmxlib, *[i for tup in inpargs.items() for i in tup]]
     else:
         raise ValueError("inpargs must be either a list of input arguments or a dict")
     if interactive is None:
