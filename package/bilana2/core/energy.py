@@ -167,47 +167,74 @@ class Energy(Systeminfo):
         ''' Run the energy calculation between each lipid and the opposing leaflet  '''
         LOGGER.info('Rerunning MD for energyfiles')
 
+        resindex_all_file = self.resindex_all
+
         for res in resids:
             LOGGER.info('Working on lipid %s ...', res)
             leaflet = self.convert.resid_to_leaflet[res]
 
-            ### Get all leaflets from other leaflets ###
+            ### Separate all resids from other leaflets ###
             ### ! This takes the leaflet assignment from frame 1, though  ! ###
             ### ! it should be dynamic, thus for future purpose this loop ! ###
             ### ! should remain inside the loop over resids               ! ###
-            res_other_leaflet = []
-            res_same_leaflet = []
-            for nres in self.lipid_resids:
-                leaf = self.convert.resid_to_leaflet[nres]
-                if leaf != leaflet:
-                    res_other_leaflet.append(nres)
-                else:
-                    if nres == res:
-                        continue
-                    res_same_leaflet.append(nres)
+            #res_other_leaflet = []
+            #res_same_leaflet = []
+            #for nres in self.lipid_resids:
+            #    leaf = self.convert.resid_to_leaflet[nres]
+            #    if leaf != leaflet:
+            #        res_other_leaflet.append(nres)
+            #    else:
+            #        if nres == res:
+            #            continue
+            #        res_same_leaflet.append(nres)
 
             ### Create an index file containing the reference molecule and ###
             ### indices of all mols in the opposing leaflet                ###
-            outputndx = "{}/energy_leaflet_res{}.ndx".format(self.path.tmp, res)
-            self.resindex_all = outputndx
-            selectionstr = 'System=all;'\
-                           'interleaflet=resname {resnames} and resid {interlipids};'\
-                           'leaflet=resname {resnames} and resid {leafletlipids};'\
-                           'resid_{hostid}=resid {hostid};'\
-                           'resid_{hostid}; interleaflet; leaflet; System;'\
-                           .format(resnames=' '.join(self.molecules),
-                                interlipids=' '.join([str(i) for i in res_other_leaflet]),
-                                leafletlipids=' '.join([str(i) for i in res_same_leaflet]),
-                                hostid=res,
-                           )
+            #outputndx = "{}/energy_leaflet_res{}.ndx".format(self.path.tmp, res)
+            #self.resindex_all = outputndx
+            #selectionstr = 'System=all;'\
+            #               'interleaflet=resname {resnames} and resid {interlipids};'\
+            #               'leaflet=resname {resnames} and resid {leafletlipids};'\
+            #               'resid_{hostid}=resid {hostid};'\
+            #               'resid_{hostid}; interleaflet; leaflet; System;'\
+            #               .format(resnames=' '.join(self.molecules),
+            #                    interlipids=' '.join([str(i) for i in res_other_leaflet]),
+            #                    leafletlipids=' '.join([str(i) for i in res_same_leaflet]),
+            #                    hostid=res,
+            #               )
 
-            cmd = [
-                "-f", self.path.gro,
-                "-s", self.path.tpr, "-select", selectionstr,
-                "-on", outputndx,
-                ]
-            out, err = exec_gromacs(GMXNAME, "select", cmd)
-            write_log("gmx_select", out, err, path=self.path.log)
+            #cmd = [
+            #    "-f", self.path.gro,
+            #    "-s", self.path.gro, "-select", selectionstr,
+            #    "-on", outputndx,
+            #    ]
+            #out, err = exec_gromacs(GMXNAME, "select", cmd)
+            #write_log("gmx_select", out, err, path=self.path.log)
+
+            ### Add for specific resid interleaflet and leaflet group to resindex_all file ###
+            ndxname = "{}/energy_leaflet_res{}.ndx".format(self.path.tmp, res)
+            cmd = [ "-n", resindex_all_file,
+                    "-o", ndxname]
+            inp_str = '"leaflet0" & !"resid_{0}"\n\n"leaflet1" & !"resid_{0}"\n\nq\n'.format(res)
+            out, err = exec_gromacs(GMXNAME, "make_ndx", cmd, inp_str)
+            write_log("gmx_make_ndx", out, err, path=self.path.log)
+
+            ### rename the groups set in make_ndx to leaflet and interleaflet and overwrite index file ###
+            if leaflet == 0 :
+                rename_grp1 = ["leaflet0_&_!resid_{0}".format(res), "leaflet"]
+                rename_grp2 = ["leaflet1_&_!resid_{0}".format(res), "interleaflet"]
+            if leaflet == 1 :
+                rename_grp1 = ["leaflet0_&_!resid_{0}".format(res), "interleaflet"]
+                rename_grp2 = ["leaflet1_&_!resid_{0}".format(res), "leaflet"]
+
+            tmpndx = ndxname.replace(".ndx", "tmp.ndx") 
+            with open(ndxname, "r") as inpndxf, open(tmpndx, "w") as outndxf:
+                for line in inpndxf:
+                   outndxf.write(line.replace(*rename_grp1).replace(*rename_grp2))
+            os.replace(tmpndx, ndxname)
+
+            self.resindex_all = ndxname
+
 
             ### Defining input and output file paths ###
             g_energy_output = '{}/xvgtables/energies_residue{}_leaflet.xvg'\
@@ -972,7 +999,7 @@ def add_water_groups_to_index(sysinfo, add_grp_to="resindex_all.ndx"):
     selectionstr = 'solv=resname {}; solv;'.format(sysinfo.water_resname)
     outputsel = sysinfo.path.tmp + "/tmp_leaflet.ndx"
     cmd = [
-        "-f", sysinfo.path.gro,
+       "-f", sysinfo.path.gro,
         "-s", sysinfo.path.tpr, "-select", selectionstr,
         "-on", outputsel
         ]
