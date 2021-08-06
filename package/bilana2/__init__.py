@@ -1,4 +1,5 @@
 from .core.systeminfo import Systeminfo
+from .core.systeminfo import LOGGER
 from .core import energy
 from .core import neighbor
 from .core import order

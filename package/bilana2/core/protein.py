@@ -25,6 +25,7 @@ from bisect import bisect
 from .neighbor import get_ref_positions
 
 LOGGER = logging.getLogger("bilana2.core.protein")
+#LOGGER.setLevel("DEBUG")
 
 AMINO_ACIDS = ["ALA", "ARG", "ASN", "ASP", "ASX", "CYS", "GLU", "GLN", "GLX", "GLY", "HSD",
     "ILE", "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "TRP", "TYR", "VAL",
@@ -70,7 +71,7 @@ def get_residuegroup_from_seq(protein_sequences, universe: mda.Universe) -> mda.
     residue_groups = []
 
     protein_selection = universe.atoms.select_atoms("protein").residues
-    LOGGER.debug("protein selection is %s", protein_selection)
+    LOGGER.debug("protein selection is %s with %s items", protein_selection, len(protein_selection))
 
     ### Translate 3 letter code to 1 letter sequence ###
     all_sequence_1letter = ""
@@ -86,18 +87,27 @@ def get_residuegroup_from_seq(protein_sequences, universe: mda.Universe) -> mda.
             ind = all_sequence_1letter.find(sequence)
 
             if ind >= 0:
-                LOGGER.debug("Appending residue group: %s",  protein_selection[ ind:ind+len(sequence) ])
-                residue_groups.append( protein_selection[ ind:ind+len(sequence) ] )
+                protein_group = protein_selection[ ind:ind+len(sequence) ]
+                LOGGER.debug("Appending residue group: %s",  protein_group)
+                LOGGER.debug("Atom ids %s", protein_group.ids)
+                residue_groups.append( protein_group )
+                LOGGER.debug("Having now %s residue groups", len(residue_groups))
 
                 protein_selection = protein_selection[:ind] + protein_selection[ind+len(sequence):]
                 all_sequence_1letter = all_sequence_1letter[:ind] + all_sequence_1letter[ind+len(sequence):]
-                LOGGER.debug("protein_selection now is %s and lettercode %s", protein_selection, all_sequence_1letter )
+                LOGGER.debug("protein_selection now is %s (%s items) and lettercode %s", protein_selection, len(protein_selection),  all_sequence_1letter )
 
                 search += 1
 
+                LOGGER.debug("At search %s", search)
+
             else:
                 if search == 1:
+                    print(search, "before error")
                     raise LookupError("input sequence {} not found in bilayer".format(sequence))
+                search = False
+
+            if search > 1:
                 search = False
 
     if len(protein_selection) != 0:
@@ -110,6 +120,7 @@ def get_residuegroup_from_seq(protein_sequences, universe: mda.Universe) -> mda.
 
 
 class Protein():
+
     '''
         Class Protein holds together a group of mda.residues of a specified sequence
         Input:
@@ -227,25 +238,24 @@ def create_protein_neighborfile(systeminfo,
         for resname in lipid_resnames])
     prot_refatomnames = systeminfo.ff.central_atom_of("protein")
 
-    for protein in systeminfo.proteins:
-        protid = protein.id
-        LOGGER.info("At protein %s", protid)
+    if not overwrite and os.path.isfile(outputfilename):
+        LOGGER.info("File {} exists, will not overwrite".format(outputfilename))
+        return
 
-        outputfilename = outputfilename.replace(".dat", "_{}.dat".format(protid))
+    with open(outputfilename, "w") as outf:
+        print("{: <20}{: <20}{: <20}{: <20}{: <20}{: <20}".format("protid", "resid", "time", "leaflet", "Number_of_neighbors", "List_of_Neighbors"), file=outf)
+        for protein in systeminfo.proteins:
+            protid = protein.id
+            LOGGER.info("At protein %s", protid)
 
-        traj_len = len(systeminfo.universe.trajectory)
+            traj_len = len(systeminfo.universe.trajectory)
 
-        if not overwrite and os.path.isfile(outputfilename):
-            LOGGER.info("File {} exists, will not overwrite".format(outputfilename))
-            return
-
-        with open(outputfilename, "w") as outf:
-            print("{: <20}{: <20}{: <20}{: <20}{: <20}".format("resid", "time", "leaflet", "Number_of_neighbors", "List_of_Neighbors"), file=outf)
             for t in range(traj_len):
                 time = systeminfo.universe.trajectory[t].time
                 if not systeminfo.within_timerange(time):
                     continue
                 LOGGER.info("At time %s", time)
+
                 refatomgrp = systeminfo.universe.select_atoms(refatoms)
                 refpositions = get_ref_positions(systeminfo, "atom", refatomgrp) # leaflets=[(resid1, pos1), ...]
 
@@ -255,8 +265,6 @@ def create_protein_neighborfile(systeminfo,
                 position_array   =  np.array([pos for resid, pos in refpositions])
                 position_array2d =  position_array.copy()
                 position_array2d[:,2] = 0
-
-
 
                 for refatm in protein.reference_atoms:
 
@@ -297,8 +305,7 @@ def create_protein_neighborfile(systeminfo,
                     neiblist = ','.join( neiblist )
                     LOGGER.debug("Neiblist: %s", neiblist)
 
-
-                    print("{: <20}{: <20}{: <20}{: <20}{: <20}".format(hostid, time, leaflet, n_neibs, neiblist), file=outf)
+                    print("{: <20}{: <20}{: <20}{: <20}{: <20}{: <20}".format(protid, hostid, time, leaflet, n_neibs, neiblist), file=outf)
 
 
 
@@ -328,7 +335,6 @@ def create_protein_protein_distancefile(systeminfo, protein1, protein2, outputfi
         distances.append(dist)
     dat = pd.DataFrame({"time":times, "distance":distances})
     dat.to_csv(outputfilename, index=False)
-
 
 
 

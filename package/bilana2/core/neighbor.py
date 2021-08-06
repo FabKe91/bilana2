@@ -198,6 +198,32 @@ def get_neighbor_dict(neighborfilename='neighbor_info'):
 
     return neibdict
 
+def get_protein_neighbor_dict(neighborfilename='protein_neighbors.dat'):
+    ''' Returns a list of all neighbors of each protein being in the
+        cutoff distance at least once in the trajectory.
+        Neighborfile is required and is output of determine_neighbors function
+
+        Dict layout is:
+        neibdict[time][resid] -> [neibs]
+
+    '''
+
+    neibdict = {}
+
+    data = pd.read_table(neighborfilename, sep="\s+")
+    data["nlist"] = data.fillna('').List_of_Neighbors\
+        .apply(lambda x: [int(i) for i in x.split(',') if i ])
+    data = data.drop( columns=["Number_of_neighbors", "List_of_Neighbors", "resid"] )
+    data = data.groupby(["time", "protid"]).apply(lambda x: list(set(np.array(x["nlist"]).sum()))).reset_index(name="nlist")
+
+    for t, fr in data.groupby("time"):
+        neibdict[t] = fr.set_index("protid").to_dict()["nlist"]
+
+    return neibdict
+
+
+
+
 def create_neibcount_file(sysinfo, neighborlist, outputfilename="neighborcount.dat"):
     '''
         Creates a file that stores information about the numbers of neighbors of each lipid type
