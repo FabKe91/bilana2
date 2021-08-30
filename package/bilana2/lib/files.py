@@ -26,34 +26,39 @@ def create_eofs(outputfile="EofScd{}.csv",
     energy = pd.read_table(efile, sep="\s+")
     colnames = ["time", "host", "neighbor", "molparts", "VdW", "Coul", "Etot"]
     compare_cols(colnames, energy.columns)
-
-    LOGGER.info("loading order file (%s)...", sfile)
-    #HEAD: time   resid   leaflet  resname   Scd
-    order  = pd.read_table(sfile, sep="\s+")
-    colnames = ["time", "resid", "leaflet", "resname", "Scd"]
-    compare_cols(colnames, order.columns)
-
-    LOGGER.info("loading neighbortype file (%s)...", neighbortypefile)
-    #HEAD: time   resid resname   Neibs_Type1 Neibs_Type2 ...
-    neib = pd.read_table(neighbortypefile, sep="\s+")
-    if not ("time" in neib.columns and "resid" in neib.columns and "resname" in neib.columns):
-        compare_cols(["time", "resid", "resname", "..."], neib.columns)
+    energy = energy.rename(columns={"neighbor":"neib"})
+    print(energy.info())
 
     LOGGER.info("loading neighbor info file (%s)...", neighborinfofile)
     #HEAD: resid  time  Number_of_neighbors List_of_Neighbors
     neibmap = pd.read_table(neighborinfofile, sep="\s+")
     colnames = ["time", "resid", "Number_of_neighbors", "List_of_Neighbors"]
     compare_cols(colnames, neibmap.columns)
-    
-    LOGGER.info("editing names...")
-    ### Edit names | From here on work with new column list ! ###
     neibmap["nlist"] = neibmap.fillna('').List_of_Neighbors\
             .apply(lambda x: [int(i) for i in x.split(',') if i ])
     neibmap = neibmap.drop( columns=["Number_of_neighbors", "List_of_Neighbors"] )
     neibmap = neibmap.rename(columns={"resid":"host"})
-    neib   = neib.rename(columns={"resid":"host", "resname":"host_type"})
-    order  = order.rename(columns={"resid":"host", "resname":"host_type", "Scd":"host_Scd"})
-    energy = energy.rename(columns={"neighbor":"neib"})
+
+    ### Removing entries where pair is not within cutoff distance ###
+    energy = energy[energy.time >= neibmap.time.min()]
+    energy_neibs = energy[["time", "host", "neib"]].merge(neibmap, on=["time", "host"])
+
+    del neibmap
+
+    LOGGER.info("remove non-neighbor cutoff pairs from energy...")
+    mask = []
+    for res, nlist in zip(energy_neibs.neib, energy_neibs.nlist):
+        mask.append(res in nlist)
+    
+    del energy_neibs
+
+    energy = energy[mask]
+    print(energy.info())
+
+    del mask
+
+
+    ### Edit names | From here on work with new column list ! ###
     ### New column names are:
     ### energy:         time   host             neib      molparts     VdW       Coul       Etot
     ### order:          time   host   resname   leaflet  Scd
@@ -66,23 +71,29 @@ def create_eofs(outputfile="EofScd{}.csv",
     #LOGGER.info("remove duplicate entries from energy...")
     #energy = energy[energy.host < energy.neib]
 
-    ### Removing entries where pair is not within cutoff distance ###
-    LOGGER.info("remove non-neighbor cutoff pairs from energy...")
-    energy = energy.merge(neibmap, on=["time", "host"])
-    mask = []
-    for res, nlist in zip(energy.neib, energy.nlist):
-        mask.append(res in nlist)
-    energy = energy[mask].drop(columns=["nlist"])
-
     ### Frames okay? ###
-    LOGGER.debug("neib:\n%s", neib)
-    LOGGER.debug("order:\n%s", order)
-    LOGGER.debug("energy:\n%s", energy)
+    #LOGGER.debug("neib:\n%s", neib)
+    #LOGGER.debug("order:\n%s", order)
+    #LOGGER.debug("energy:\n%s", energy)
 
     ### get dict to receive info for neighbor ###
+    LOGGER.info("loading order file (%s)...", sfile)
+    #HEAD: time   resid   leaflet  resname   Scd
+    order  = pd.read_table(sfile, sep="\s+")
+    colnames = ["time", "resid", "leaflet", "resname", "Scd"]
+    compare_cols(colnames, order.columns)
+    order  = order.rename(columns={"resid":"host", "resname":"host_type", "Scd":"host_Scd"})
 
     s_dict    = order.filter(["time", "host",  "host_Scd"])\
             .set_index(["time", "host"]).to_dict()["host_Scd"]
+
+    LOGGER.info("loading neighbortype file (%s)...", neighbortypefile)
+    #HEAD: time   resid resname   Neibs_Type1 Neibs_Type2 ...
+    neib = pd.read_table(neighbortypefile, sep="\s+")
+    if not ("time" in neib.columns and "resid" in neib.columns and "resname" in neib.columns):
+        compare_cols(["time", "resid", "resname", "..."], neib.columns)
+    neib   = neib.rename(columns={"resid":"host", "resname":"host_type"})
+
     resn_dict = order.filter(["host", "host_type"])\
             .set_index("host").to_dict()["host_type"]
 
@@ -90,12 +101,18 @@ def create_eofs(outputfile="EofScd{}.csv",
     LOGGER.info("merging files...")
 
     order  = order.merge(neib, on=["time", "host", "host_type"])
+
+    del neib
+
     final = energy.merge(order, on=["time", "host"])
+
+    del energy
+
     final = final.merge(order.rename(columns={"host":"neib", "host_type":"neib_type", "host_Scd":"neib_Scd"}), on=["time", "neib"],suffixes=("_host", "_neib") ) # create neib_Scd and neib_type entries
     #final = final.merge(neib.rename(columns={"host":"neib", "host_type":"neib_type", }), on=["time", "neib", "neib_type"], ) # create neighborhood of neib entries 
-    del neib
+
     del order
-    del energy
+
     #final["neib_Scd"]  =  pd.Series(zip(final.time, final.neib)).map(s_dict)
     #final["neib_type"] =  pd.Series(zip(final.time, final.neib)).map(resn_dict)
 
