@@ -140,7 +140,7 @@ def calculate_overlapscore(sysinfo, refsel, chainsel,
     return outputfilename
 
 def calculate_thickness(sysinfo, refsel,
-    radius=10, delta_t=1000,
+    radius=10, delta_t=50000,
     outputfilename="thickness_chunks.csv",
     loglevel="INFO",
     ):
@@ -158,6 +158,7 @@ def calculate_thickness(sysinfo, refsel,
 
         There will be a second outputfile, saving the maximum height difference in each frame
     '''
+    delta_t = float(delta_t)
     LOGGER.setLevel(loglevel)
 
     LOGGER.info("Calculating with selection: %s\n Using r=%s and delta_t=%s ps", refsel, radius, delta_t)
@@ -166,11 +167,14 @@ def calculate_thickness(sysinfo, refsel,
     chunksizes = []
     thicknesses = []
     chunkframes = []
+    finalframes = []
     u = sysinfo.universe
 
     if len(u.residues.atoms.select_atoms(refsel)) == 0:
         raise ValueError('refsel "{}" never matches any atoms'.format(refsel))
 
+
+    timecounter = 0
     for ts in u.trajectory:
         time = ts.time
         if not sysinfo.within_timerange(time):
@@ -186,8 +190,10 @@ def calculate_thickness(sysinfo, refsel,
         all_pos_2d[:,2] = 0
 
         for res_i in residues:
+
             if res_i.resname not in sysinfo.molecules or not (res_i.atoms.select_atoms(refsel)):
                 continue
+
             LOGGER.debug("\n\n")
             LOGGER.debug("At time %s res %s", time, res_i) 
 
@@ -232,9 +238,19 @@ def calculate_thickness(sysinfo, refsel,
             thicknesses.append(thickness)
             chunksizes.append(chunksize)
 
+
+
         chunkframe = pd.DataFrame({"resid":resids, "thickness":thicknesses, "chunksize":chunksizes})
         chunkframe["time"] = time
         chunkframes.append( chunkframe )
+            
+        timecounter += 1
+        if timecounter*ts.dt == delta_t:
+            data_tmp = pd.concat(chunkframes)
+            chunkframes = []
+            data_tmp = data_tmp.groupby("resid").mean().reset_index()
+            finalframes.append(data_tmp)
+            LOGGER.info("Averaging")
 
         LOGGER.debug("from residue choice:\n %s \n", res_within_chunk)
         LOGGER.debug("Last entries of chunk:")
@@ -244,7 +260,9 @@ def calculate_thickness(sysinfo, refsel,
         LOGGER.debug("chunksize %s", chunksizes[-1])
 
 
-    final = pd.concat(chunkframes)
+    final = pd.concat(finalframes)
+    del data_tmp
+    del finalframes
 
     ### Find minimum and maximum height and calculate difference ###
     #s = final.groupby("time").apply(lambda x: x.thickness.max() - x.thickness.min() )
@@ -262,21 +280,21 @@ def calculate_thickness(sysinfo, refsel,
     LOGGER.debug("frame before averaging:\n%s", final)
 
     ### Calculating number of frames to be averaged over ###
-    dt         = u.trajectory.dt
-    frame_step = int(delta_t // dt) if int(delta_t // dt) else 1
+    #dt         = u.trajectory.dt
+    #frame_step = int(delta_t // dt) if int(delta_t // dt) else 1
 
-    if frame_step != 1:
-        start_time = sysinfo.t_start
-        final_time = sysinfo.t_end - delta_t
-        binrange = (start_time, final_time, delta_t)
-        bins =  []
-        for i in np.arange(*binrange):
-            bins.append( (i,i+binrange[2]) )
-        bins = pd.IntervalIndex.from_tuples(bins)
-        final["bins"] = pd.cut(final.time, bins=bins)
-        LOGGER.debug("bins from range %s: %s", binrange, bins)
-        LOGGER.debug("frame after averaging:\n%s", final)
-        final = final.groupby(["bins", "resid"]).mean().reset_index().drop(columns=["bins"])
+    #if frame_step != 1:
+    #    start_time = sysinfo.t_start
+    #    final_time = sysinfo.t_end - delta_t
+    #    binrange = (start_time, final_time, delta_t)
+    #    bins =  []
+    #    for i in np.arange(*binrange):
+    #        bins.append( (i,i+binrange[2]) )
+    #    bins = pd.IntervalIndex.from_tuples(bins)
+    #    final["bins"] = pd.cut(final.time, bins=bins)
+    #    LOGGER.debug("bins from range %s: %s", binrange, bins)
+    #    LOGGER.debug("frame after averaging:\n%s", final)
+    #    final = final.groupby(["bins", "resid"]).mean().reset_index().drop(columns=["bins"])
 
     final.to_csv(outputfilename, index=False)
     return outputfilename
