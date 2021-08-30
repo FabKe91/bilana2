@@ -20,6 +20,8 @@ import pandas as pd
 import MDAnalysis as mda
 import MDAnalysis.analysis.helanal as hl
 
+from MDAnalysis.lib.distances import distance_array, calc_bonds, self_distance_array, calc_angles
+
 from bisect import bisect
 
 from .neighbor import get_ref_positions
@@ -336,5 +338,108 @@ def create_protein_protein_distancefile(systeminfo, protein1, protein2, outputfi
     dat = pd.DataFrame({"time":times, "distance":distances})
     dat.to_csv(outputfilename, index=False)
 
+
+def calculate_crossing_angle(systeminfo, protein1, protein2,
+        outputfilename='crossing_angle.dat',
+        binwidth=10000,
+        sel="name CA"):
+
+
+    u = systeminfo.universe
+    start = systeminfo.t_start
+    end = systeminfo.t_end
+    dt = systeminfo.dt
+
+    sel_b_k = protein1.residues[0:4].atoms.select_atoms(sel)
+    sel_b_j = protein2.residues[0:4].atoms.select_atoms(sel)
+
+    sel_e_k = protein1.residues[-4:].atoms.select_atoms(sel)
+    sel_e_j = protein2.residues[-4:].atoms.select_atoms(sel)
+        
+    dt = u.trajectory.dt
+    if binwidth < dt:
+        binwidth = dt
+
+    start_frame = int(start / dt)
+    end_frame = int(end / dt)
+    time_interval = int(binwidth / dt)
+
+    data = pd.DataFrame([])
+
+    for i_ts,ts in enumerate(u.trajectory[start_frame:end_frame:time_interval]):
+
+        time = ts.time
+        box = u.dimensions
+
+        box_dim = box[:3]        
+
+        b_k, e_k = sel_b_k.center_of_geometry(), sel_e_k.center_of_geometry()
+        b_j, e_j = sel_b_j.center_of_geometry(), sel_e_j.center_of_geometry()
+
+        t_k, t_j = minimal_distance(b_k,e_k,b_j,e_j)
+
+        crossing_angle = mda.lib.distances.calc_dihedrals(b_k, t_k, t_j, b_j, box=box) * (180/np.pi)
+
+        if crossing_angle > 90:
+            crossing_angle = crossing_angle - 90
+        if crossing_angle < -90:
+            crossing_angle = crossing_angle + 90
+        
+        dist_com_uncorrected = distance_array(protein1.residues.atoms.center_of_geometry(), protein2.residues.atoms.center_of_geometry())[0][0]
+
+        diffvector1 = np.subtract(b_k,e_k)
+        diffvector2 = np.subtract(b_j,e_j)
+
+        tmd_angle = np.arccos(np.dot(diffvector1, diffvector2)/(np.linalg.norm(diffvector1)*np.linalg.norm(diffvector2))) * (180/np.pi)
+
+        if (dist_com_uncorrected > box_dim[0]/2) or (dist_com_uncorrected > box_dim[1]/2):
+
+            s = np.sign(crossing_angle)
+
+            if s != 0:
+                crossing_angle = np.abs(tmd_angle)*s
+
+        data = data.append(pd.DataFrame({'time': time, 'crossing_angle': crossing_angle}, index=[i_ts]), ignore_index=False)        
+            
+    data.to_csv(outputfilename, index=False)
+
+
+def minimal_distance(begA, endA, begB, endB):
+
+    W1 = np.dot((begA - begB), (endA - begA))
+    W2 = np.dot((begA - begB), (endB - begB))
+    U11 = (np.linalg.norm(endA - begA)) ** 2
+    U12 = np.dot((endA - begA), (endB - begB))
+    U22 = (np.linalg.norm(endB - begB)) ** 2
+    Det = np.dot(U11, U22) - np.dot(U12, U12)
+    
+    if Det == 0:
+
+        SA = 0.5
+        SB = 0.5
+    else:
+        SA = (np.dot(W2, U12) - np.dot(W1, U22)) / Det
+        SB = (np.dot(W2, U11) - np.dot(W1, U12)) / Det
+
+        if SA > 1:
+            SA = 1
+        elif SA < 0:
+            SA = 0
+        else:
+            SA = SA
+
+        if SB > 1:
+            SB = 1
+        elif SB < 0:
+            SB = 0
+        else:
+            SB = SB
+
+    tA = begA + SA * (endA - begA)
+    tB = begB + SB * (endB - begB)
+    tA = np.array(tA, dtype=float)
+    tB = np.array(tB, dtype=float)
+
+    return tA, tB
 
 
