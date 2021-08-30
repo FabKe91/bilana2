@@ -33,6 +33,7 @@ from .systeminfo import Systeminfo
 from ..lib.gromacswrapper import GMXNAME, exec_gromacs, write_log
 
 LOGGER = logging.getLogger("bilana2.core.energy")
+LOGGER.setLevel("DEBUG")
 
 
 class Energy(Systeminfo):
@@ -554,21 +555,21 @@ def create_lipid_leaflet_interaction_file(sysinfo, outputfilename="resid_leaflet
     energyoutput.close()
 
 
-def create_protein_interaction_file(sysinfo, protein_neiblist, outputfilename="protein_interactions.dat"):
+def create_protein_interaction_file(sysinfo, outputfilename="protein_interactions.dat"):
     ''' Create a file with entries of
         interaction of resid at time to leaflet0 and leaflet1
         <time> <proteinid> <partner> <resname_p> <leaflet> <Etot> <Evdw> <Ecoul>
     '''
     energyoutput = open(outputfilename, "w")
-    print('{: <10}{: <11}{: <11}{: <13}{: <10}{: <20}{: <20}{: <20}'\
-        .format("time", "proteinid", "partner", "resname_p", "leaflet", "Etot", "Evdw", "Ecoul"),
+    print('{: <10}{: <11}{: <11}{: <10}{: <20}{: <20}{: <20}'\
+        .format("time", "proteinid", "partner",  "leaflet", "Etot", "Evdw", "Ecoul"),
             file=energyoutput)
 
 
     # partners: proteinY proteinY_leaflet0 proteinY_leaflet1 leaflet0 leaflet1 resid_X
-    proteingrps =  []#[f"protein{protid}" for protid in protein.id]
-    proteingrps += [f"protein{protid}_leaflet0" for protid in protein.id]
-    proteingrps += [f"protein{protid}_leaflet1" for protid in protein.id]
+    proteingrps =  [f"protein{protein.id}" for protein in sysinfo.proteins]
+    #proteingrps += [f"protein{protein.id}_leaflet0" for protein in sysinfo.proteins]
+    #proteingrps += [f"protein{protein.id}_leaflet1" for protein in sysinfo.proteins]
 
     protein_interaction_partners  = proteingrps.copy()
     protein_interaction_partners += ["leaflet0", "leaflet1"]
@@ -611,11 +612,15 @@ def create_protein_interaction_file(sysinfo, protein_neiblist, outputfilename="p
                         else:
                             leaflet = 2 # index 2 means both leaflets
 
-                        vdw  = float( energyline_cols[ res_to_rowindex[ ( 'LJ-SR',   partner_l, partner_r ) ] ] )
-                        coul = float( energyline_cols[ res_to_rowindex[ ( 'Coul-SR', partner_l, partner_r ) ] ] )
+                        try:
+                            vdw  = float( energyline_cols[ res_to_rowindex[ ( 'LJ-SR',   partner_l, partner_r ) ] ] )
+                            coul = float( energyline_cols[ res_to_rowindex[ ( 'Coul-SR', partner_l, partner_r ) ] ] )
+                        except KeyError:
+                            print("Key {}, {} not in energyline_cols".format(partner_l, partner_r))
+                            continue
                         Etot = vdw + coul
 
-                        outpline = '{: <10}{: <11}{: <11}{: <13}{: <10}{: <20.5f}{: <20.5f}{: <20.5f}'\
+                        outpline = '{: <10}{: <11}{: <11}{: <10}{: <20.5f}{: <20.5f}{: <20.5f}'\
                             .format(time, partner_l, partner_r, leaflet, Etot, vdw, coul,)
                         print(outpline, file=energyoutput)
 
