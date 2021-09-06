@@ -43,7 +43,7 @@ def create_eofs(outputfile="EofScd{}.csv",
     energy = energy[energy.time >= neibmap.time.min()]
     energy_neibs = energy[["time", "host", "neib"]].merge(neibmap, on=["time", "host"])
 
-    del neibmap
+    #del neibmap #necessary if CHOL is present in system
 
     LOGGER.info("remove non-neighbor cutoff pairs from energy...")
     mask = []
