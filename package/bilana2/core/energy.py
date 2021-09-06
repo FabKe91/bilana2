@@ -33,7 +33,7 @@ from .systeminfo import Systeminfo
 from ..lib.gromacswrapper import GMXNAME, exec_gromacs, write_log
 
 LOGGER = logging.getLogger("bilana2.core.energy")
-LOGGER.setLevel("DEBUG")
+LOGGER.setLevel("INFO")
 
 
 class Energy(Systeminfo):
@@ -283,57 +283,77 @@ class Energy(Systeminfo):
         '''
         LOGGER.info('Rerunning MD for energyfiles')
 
+        ### Get all neighbors of proteins ###
         all_neibs_of_prot = []
         for protein in proteins:
             protid = protein.id
             all_neibs_of_prot += list(set([neibs for t in protneiblist.keys()
                     for neibs in protneiblist[t][protid]]))
 
-        neighborgrpnames = ["resid_"+str(i) for i in all_neibs_of_prot]
+        nneibs = len(all_neibs_of_prot)
 
-        ### Defining input and output file paths ###
-        g_energy_output = '{}/xvgtables/energies_protein.xvg'\
-                            .format(self.path.energy, )
-        mdpout          = '{}/mdpfiles/energy_mdp_recalc_protein.mdp'\
-                            .format(self.path.energy, )
-        tprout          = '{}/tprfiles/mdrerun_protein.tpr'\
-                            .format(self.path.energy,)
-        energyf_output  = '{}/edrfiles/energyfile_protein.edr'\
-                            .format(self.path.energy, )
-        xvg_out         = '{}/xvgtables/energies_protein.xvg'\
-                            .format(self.path.energy, )
-        energygroups = ' '.join( [f"protein{protein.id}" for protein in proteins] 
-                                 #+ [f"protein{protein.id}_leaflet0" for protein in proteins]
-                                 #+ [f"protein{protein.id}_leaflet1" for protein in proteins]
-                                 + ["leaflet0", "leaflet1"]
-                                 #+ neighborgrpnames
-                                   ) 
-        print(energygroups)
 
-        ### Get relevant group strings ###
-        Etypes=["Coul-SR:", "LJ-SR:"]
-        energyselection = []
-        for grp_l in energygroups.split(" "):
-            for grp_r in energygroups.split(" "):
-                for interaction in Etypes:
-                    energyselection.append( "{}{}-{}".format(
-                        interaction, grp_l, grp_r,
-                        ))
-        relev_energies  = '\n'.join( energyselection + ['\n'])
-
-        # Run functions
-        self.create_MDP(mdpout, energygroups)
-        self.create_TPR(mdpout, tprout)
-        if os.path.isfile(energyf_output) and not self.overwrite:
-            LOGGER.info("Edrfile for protein %s already exists. "
-                        "Will skip this calculation.", protein.id)
+        ### Split neighborlist such that max_lipids_per_calc is not exceeded ###
+        if nneibs % self.max_lipids_per_calc == 0:
+            number_of_groupfragments = ( nneibs // self.max_lipids_per_calc )
         else:
-            self.do_Energyrun('protein', 0, tprout, energyf_output, ntomp=ntomp, ntasks=ntasks)
-        if os.path.isfile(g_energy_output) and not self.overwrite:
-            LOGGER.info("Xvgtable for protein %s already exists. "
-                        "Will skip this calculation.", protein.id)
-        else:
-            self.write_XVG(energyf_output, tprout, relev_energies, xvg_out)
+            number_of_groupfragments = ( nneibs // self.max_lipids_per_calc ) + 1
+        LOGGER.info("Needing %s energy run(s)", number_of_groupfragments)
+
+        for groupfragment in range(number_of_groupfragments):
+            LOGGER.info("... on fragment %s ...", groupfragment)
+
+            groupblockstart  = groupfragment * self.max_lipids_per_calc
+            groupblockend    = (groupfragment+1) * self.max_lipids_per_calc
+            self.groupblocks = (groupblockstart, groupblockend)
+
+            neighborgrpnames = [ "resid_"+str(i) for i in all_neibs_of_prot[ self.groupblocks[0]:self.groupblocks[1] ] ] 
+
+            # File in-/outputs
+
+            ### Defining input and output file paths ###
+            g_energy_output = '{}/xvgtables/energies_protein_{}.xvg'\
+                                .format(self.path.energy, groupfragment )
+            mdpout          = '{}/mdpfiles/energy_mdp_recalc_protein_{}.mdp'\
+                                .format(self.path.energy, groupfragment )
+            tprout          = '{}/tprfiles/mdrerun_protein_{}.tpr'\
+                                .format(self.path.energy, groupfragment)
+            energyf_output  = '{}/edrfiles/energyfile_protein_{}.edr'\
+                                .format(self.path.energy, groupfragment)
+            xvg_out         = '{}/xvgtables/energies_protein_{}.xvg'\
+                                .format(self.path.energy, groupfragment )
+            energygroups = ' '.join( [f"protein{protein.id}" for protein in proteins] 
+                                     #+ [f"protein{protein.id}_leaflet0" for protein in proteins]
+                                     #+ [f"protein{protein.id}_leaflet1" for protein in proteins]
+                                     #+ ["leaflet0", "leaflet1"]
+                                     + neighborgrpnames
+                                       ) 
+            LOGGER.debug("energygroups: %s", energygroups)
+
+            ### Get relevant group strings ###
+            Etypes=["Coul-SR:", "LJ-SR:"]
+            energyselection = []
+            for grp_l in energygroups.split(" "):
+                for grp_r in energygroups.split(" "):
+                    for interaction in Etypes:
+                        energyselection.append( "{}{}-{}".format(
+                            interaction, grp_l, grp_r,
+                            ))
+            relev_energies  = '\n'.join( energyselection + ['\n'])
+
+            # Run functions
+            self.create_MDP(mdpout, energygroups)
+            self.create_TPR(mdpout, tprout)
+            if os.path.isfile(energyf_output) and not self.overwrite:
+                LOGGER.info("Edrfile for protein %s already exists. "
+                            "Will skip this calculation.", protein.id)
+            else:
+                self.do_Energyrun('protein', 0, tprout, energyf_output, ntomp=ntomp, ntasks=ntasks)
+            if os.path.isfile(g_energy_output) and not self.overwrite:
+                LOGGER.info("Xvgtable for protein %s already exists. "
+                            "Will skip this calculation.", protein.id)
+            else:
+                self.write_XVG(energyf_output, tprout, relev_energies, xvg_out)
         return 1
 
 
@@ -555,86 +575,115 @@ def create_lipid_leaflet_interaction_file(sysinfo, outputfilename="resid_leaflet
     energyoutput.close()
 
 
-def create_protein_interaction_file(sysinfo, outputfilename="protein_interactions.dat"):
+def create_protein_interaction_file(energy, protneiblist, outputfilename="protein_interactions.dat"):
     ''' Create a file with entries of
         interaction of resid at time to leaflet0 and leaflet1
         <time> <proteinid> <partner> <resname_p> <leaflet> <Etot> <Evdw> <Ecoul>
     '''
     energyoutput = open(outputfilename, "w")
-    print('{: <10}{: <11}{: <11}{: <10}{: <20}{: <20}{: <20}'\
-        .format("time", "proteinid", "partner",  "leaflet", "Etot", "Evdw", "Ecoul"),
+    print('{: <10}{: <11}{: <11}{: <10}{: <10}{: <20}{: <20}{: <20}'\
+        .format("time", "proteinid", "partner", "resname",  "leaflet", "Etot", "Evdw", "Ecoul"),
             file=energyoutput)
 
 
     # partners: proteinY proteinY_leaflet0 proteinY_leaflet1 leaflet0 leaflet1 resid_X
-    proteingrps =  [f"protein{protein.id}" for protein in sysinfo.proteins]
-    #proteingrps += [f"protein{protein.id}_leaflet0" for protein in sysinfo.proteins]
-    #proteingrps += [f"protein{protein.id}_leaflet1" for protein in sysinfo.proteins]
+    proteingrps =  [f"protein{protein.id}" for protein in energy.proteins]
+    #proteingrps += [f"protein{protein.id}_leaflet0" for protein in energy.proteins]
+    #proteingrps += [f"protein{protein.id}_leaflet1" for protein in energy.proteins]
 
-    protein_interaction_partners  = proteingrps.copy()
-    protein_interaction_partners += ["leaflet0", "leaflet1"]
+    #protein_interaction_partners  = proteingrps.copy()
+    #protein_interaction_partners += ["leaflet0", "leaflet1"]
 
-    xvgfilename = "{}/xvgtables/energies_protein.xvg"\
-            .format( sysinfo.path.energy,  )
+    # Get neighborhood of protein
+    all_neibs_of_prot = []
+    for protein in energy.proteins:
+        protid = protein.id
+        all_neibs_of_prot += list(set([neibs for t in protneiblist.keys()
+                for neibs in protneiblist[t][protid]]))
 
-    with open(xvgfilename,"r") as xvgfile:
-        res_to_rowindex = {}
+    n_neibs = len(all_neibs_of_prot)
+    LOGGER.debug("All neibs of proteins are %s", all_neibs_of_prot)
 
-        for energyline in xvgfile:
-            energyline_cols = energyline.split()
+    # Get number of fragments (how many runs per residue)
+    if n_neibs % energy.max_lipids_per_calc == 0:
+        number_of_groupfragments = ( n_neibs // energy.max_lipids_per_calc )
+    else:
+        number_of_groupfragments = ( n_neibs // energy.max_lipids_per_calc ) + 1
+    LOGGER.debug("Nneibs: %s Nfrags: %s", n_neibs, number_of_groupfragments)
 
-            ### creating a dict to know which column(energies) belong to which residue ###
-            if '@ s' in energyline:
-                ###@ s17 legend "LJ-SR:host_XX-partner_YY"
-                rowindex  = int(energyline_cols[1][1:])+1 # time is at row 0 !
+    ### Following line cuts the list of neighbors into sublists that corresponds to ###
+    ### the respective mdrun -rerun's                                               ###
+    all_neibs_of_prot = [ all_neibs_of_prot[ ( i*energy.max_lipids_per_calc ):( (i+1)*energy.max_lipids_per_calc ) ] for i in range(number_of_groupfragments) ]
+    #protein_lipid_neighbors = protneiblist[time][int(partner_l.replace("protein", ""))]
 
-                interaction_str = energyline_cols[3].replace("\"", "")
-                energytype, interaction_str = interaction_str.split(":")
+    for frag in range(number_of_groupfragments):
+        LOGGER.info("At fragment %s", frag)
+        xvgfilename = "{}/xvgtables/energies_protein_{}.xvg"\
+                .format( energy.path.energy, frag  )
 
-                host, partner = interaction_str.split("-")
+        with open(xvgfilename,"r") as xvgfile:
+            res_to_rowindex = {}
 
-                res_to_rowindex[(energytype, host, partner)] = rowindex
-                LOGGER.debug("Adding to dict: Etype %s, leaflettype: %s, host %s", energytype, host, partner)
+            for energyline in xvgfile:
+                energyline_cols = energyline.split()
 
-            ### pick correct energies from energyfile and print ###
-            elif '@' not in energyline and '#' not in energyline:
-                time = float(energyline_cols[0])
-                if time % sysinfo.dt != 0:
-                    continue
+                ### creating a dict to know which column(energies) belong to which residue ###
+                if '@ s' in energyline:
+                    ###@ s17 legend "LJ-SR:host_XX-partner_YY"
+                    rowindex  = int(energyline_cols[1][1:])+1 # time is at row 0 !
 
-                #protein_lipid_neighbors = protein_neiblist[time][protid]
+                    interaction_str = energyline_cols[3].replace("\"", "")
+                    energytype, interaction_str = interaction_str.split(":")
 
-                for partner_l in proteingrps:
-                    for partner_r in protein_interaction_partners:
+                    host, partner = interaction_str.split("-")
 
-                        if "leaflet" in partner_r:
-                            leaflet = partner_r.split("leaflet")[1][:1]
-                        else:
-                            leaflet = 2 # index 2 means both leaflets
+                    res_to_rowindex[(energytype, host, partner)] = rowindex
+                    LOGGER.debug("Adding to dict: Etype %s, host: %s, partner %s", energytype, host, partner)
 
-                        try:
-                            vdw  = float( energyline_cols[ res_to_rowindex[ ( 'LJ-SR',   partner_l, partner_r ) ] ] )
-                            coul = float( energyline_cols[ res_to_rowindex[ ( 'Coul-SR', partner_l, partner_r ) ] ] )
-                        except KeyError:
-                            print("Key {}, {} not in energyline_cols".format(partner_l, partner_r))
-                            continue
-                        Etot = vdw + coul
+                ### pick correct energies from energyfile and print ###
+                elif '@' not in energyline and '#' not in energyline:
+                    time = float(energyline_cols[0])
+                    if time % energy.dt != 0:
+                        continue
+                    if not energy.within_timerange(time):
+                        continue
 
-                        outpline = '{: <10}{: <11}{: <11}{: <10}{: <20.5f}{: <20.5f}{: <20.5f}'\
-                            .format(time, partner_l, partner_r, leaflet, Etot, vdw, coul,)
-                        print(outpline, file=energyoutput)
 
-                    #for neighborlipid in protein_lipid_neighbors:
-                    #    
-                    #    leaflet = sysinfo.convert.resid_to_leaflet[neighborlipid]
+                    for partner_l in proteingrps:
+                        protein_lipid_neighbors = protneiblist[time][int(partner_l.replace("protein", ""))]
+                        #for partner_r in protein_interaction_partners:
 
-                    #    vdw  = float( energyline_cols[ res_to_rowindex[ ( 'LJ-SR',   partner_l, neighborlipid ) ] ] )
-                    #    coul = float( energyline_cols[ res_to_rowindex[ ( 'Coul-SR', partner_l, neighborlipid ) ] ] )
-                    #    Etot = vdw + coul
+                        #    if "leaflet" in partner_r:
+                        #        leaflet = partner_r.split("leaflet")[1][:1]
+                        #    else:
+                        #        leaflet = 2 # index 2 means both leaflets
 
-                    #    outpline = '{: <10}{: <11}{: <11}{: <13}{: <10}{: <20.5f}{: <20.5f}{: <20.5f}'\
-                    #        .format(time, partner_l, neighborlipid, leaflet, Etot, vdw, coul,)
-                    #    print(outpline, file=energyoutput)
+                        #    try:
+                        #        vdw  = float( energyline_cols[ res_to_rowindex[ ( 'LJ-SR',   partner_l, partner_r ) ] ] )
+                        #        coul = float( energyline_cols[ res_to_rowindex[ ( 'Coul-SR', partner_l, partner_r ) ] ] )
+                        #    except KeyError:
+                        #        print("Key {}, {} not in energyline_cols".format(partner_l, partner_r))
+                        #        continue
+                        #    Etot = vdw + coul
+
+                        #    outpline = '{: <10}{: <11}{: <11}{: <10}{: <20.5f}{: <20.5f}{: <20.5f}'\
+                        #        .format(time, partner_l, partner_r, leaflet, Etot, vdw, coul,)
+                        #    print(outpline, file=energyoutput)
+
+                        for neighborlipid in all_neibs_of_prot[frag]: 
+                            if not neighborlipid in protein_lipid_neighbors:
+                                continue
+
+                            leaflet = energy.convert.resid_to_leaflet[neighborlipid]
+                            resname = energy.convert.resid_to_resname[neighborlipid]
+
+                            vdw  = float( energyline_cols[ res_to_rowindex[ ( 'LJ-SR',   partner_l, "resid_"+str(neighborlipid) ) ] ] )
+                            coul = float( energyline_cols[ res_to_rowindex[ ( 'Coul-SR', partner_l, "resid_"+str(neighborlipid) ) ] ] )
+                            Etot = vdw + coul
+
+                            outpline = '{: <10}{: <11}{: <11}{: <10}{: <10}{: <20.5f}{: <20.5f}{: <20.5f}'\
+                                .format(time, partner_l, neighborlipid, resname, leaflet, Etot, vdw, coul,)
+                            print(outpline, file=energyoutput)
     energyoutput.close()
 
 
