@@ -17,6 +17,10 @@ def create_eofs(outputfile="EofScd{}.csv",
          <host_type> <neib_type> <resname1> <resname2> ... <resnameX>
 
     '''
+
+    if LOGGER.level == logging.DEBUG:
+        pd.set_option("display.max_rows", 150)
+        
     def compare_cols(expectedcol, col):
         if set(col) != set(expectedcol):
             raise ValueError("Columns do not fit!\nexpected: {}\nfound:{}".format(expectedcol, col))
@@ -40,20 +44,31 @@ def create_eofs(outputfile="EofScd{}.csv",
     neibmap = neibmap.rename(columns={"resid":"host"})
 
     ### Removing entries where pair is not within cutoff distance ###
-    energy = energy[energy.time >= neibmap.time.min()]
-    energy_neibs = energy[["time", "host", "neib"]].merge(neibmap, on=["time", "host"])
+    energy = energy[energy.time >= neibmap.time.min()].sort_values(by=["time", "host", "neib"])
+    neibmap = neibmap[neibmap.time >= energy.time.min()]
+    energy_neibs = energy[["time", "host", "neib"]].merge(neibmap, on=["time", "host"]).sort_values(by=["time", "host", "neib"])
+    LOGGER.debug("energy raw:\n%s\nenergy /w neibmap:\%s",  energy[["time", "host", "neib"]].head(100), energy_neibs.head(100))
 
     #del neibmap #necessary if CHOL is present in system
 
     LOGGER.info("remove non-neighbor cutoff pairs from energy...")
     mask = []
-    for res, nlist in zip(energy_neibs.neib, energy_neibs.nlist):
+    for i, (res, nlist) in enumerate(zip(energy_neibs.neib, energy_neibs.nlist)):
+        if i < 101:
+            LOGGER.debug("res %s is %s in nlist %s", res, res in nlist, nlist)
         mask.append(res in nlist)
+    LOGGER.debug("mask %s vs energy %s", len(mask), len(energy.host))
     
+    if LOGGER.level == logging.DEBUG:
+        energy["mask"] = mask
+        energy_neibs["mask"] = mask
+        LOGGER.debug("/w mask 1energy 2energy_n:\n%s\n%s", energy.head(100), energy_neibs.head(100))
+
     del energy_neibs
 
     energy = energy[mask]
     print(energy.info())
+    LOGGER.debug("energy:\n%s", energy.head(100))
 
     del mask
 
