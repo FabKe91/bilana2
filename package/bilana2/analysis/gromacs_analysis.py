@@ -81,10 +81,18 @@ def calc_rdf(systeminfo, ref, sel,
     systeminfo.path.create_folders()
     os.makedirs(systeminfo.path.data+'/rdf', exist_ok=True)
 
+    begin = None
+    end = None
+
     ### Prepare addition keywords to fit exec_gromacs function ###
     additional_commands = []
     for key, val in kw_rdf.items():
-        additional_commands += ["-"+key, str(val)]
+        if key == "-b":
+            begin = str(val)
+        elif key == "-e":
+            end = str(val)
+        else:
+            additional_commands += ["-"+key, str(val)]
 
     for leafndx, reslist in enumerate(systeminfo.convert.leaflet_to_resids):
 
@@ -162,6 +170,10 @@ def calc_rdf(systeminfo, ref, sel,
                                                    .replace(" ", "").replace("\"", "")
 
         ### Run gromacs command ###
+        if begin is None:
+            begin = str(systeminfo.t_start)
+        if end is None: 
+            end = str(systeminfo.t_end)
         cmd = [
             '-xy', '-xvg', 'none',
             '-f', systeminfo.path.trj, '-s', systeminfo.path.tpr,
@@ -169,7 +181,7 @@ def calc_rdf(systeminfo, ref, sel,
             '-ref',  '-sf', selectdict[ref],
             '-sel',  '-sf', selectdict[sel],
             '-selrpos', selrpos, '-seltype', seltype, '-bin', str(binsize),
-            '-b', str(systeminfo.t_start), '-e', str(systeminfo.t_end),
+            '-b', begin, '-e', end, 
             ]
         cmd += additional_commands
         out, err = exec_gromacs(GMXNAME, "rdf", cmd)
