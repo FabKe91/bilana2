@@ -452,7 +452,7 @@ class Energy(Systeminfo):
 
         for resid in energygroup_resids:
             resname = self.convert.resid_to_resname[resid]
-            if not ( self.ff.is_sterol(resname) or self.ff.is_protein(resname) ):
+            if self.ff.is_sterol(resname) or self.ff.is_protein(resname):
                 energygroup_list.append( ''.join( ["resid_", str(resid)] ) )
             else:
                 for part in self.molparts:
@@ -519,10 +519,19 @@ class Energy(Systeminfo):
 
         Etypes=["Coul-SR:", "LJ-SR:", "Coul-14:", "LJ-14:"]
 
+        resname = self.convert.resid_to_resname[res]
+        res_is_pl = not ( self.ff.is_sterol(resname) or self.ff.is_protein(resname) )
+
         energyselection=[]
         for interaction in Etypes:
-            for parthost in self.molparts:
-                energyselection.append("{0}{1}{2}-{1}{2}".format(interaction, parthost, str(res)))
+            if not res_is_pl:
+                parthost = "resid_"
+                for partneib in self.molparts:
+                    energyselection.append( "{0}{1}{2}-{1}{2}".format(interaction, parthost, str(res)))
+            else:
+                for parthost1 in self.molparts:
+                    for parthost2 in self.molparts:
+                        energyselection.append("{0}{1}{2}-{3}{2}".format(interaction, parthost1, str(res), parthost2))
         all_relev_energies='\n'.join( energyselection + ['\n'] )
         return all_relev_energies
 
@@ -739,11 +748,21 @@ def write_selfinteractionfile(energy):
     ''' Extracts all self interaction energy entries from xvg files
         and writes them to "selfinteractions.dat"
     '''
-    with open("selfinteractions.dat", "w") as energyoutput:
+    if energy.part == "complete":
+        partid = ""
+        molparts = [""]
+    elif energy.part == "head-tail":
+        partid = "_ht"
+        molparts = []
+        for i in energy.molparts_short:
+            for j in energy.molparts_short:
+                molparts.append("{}_{}".format(i[0],j[0]))
+        
+    with open("selfinteractions{}.dat".format(partid), "w") as energyoutput:
         print(\
-              '{: <10}{: <10}{: <10}'
+                '{: <10}{: <10}{: <10}{: <10}'
               '{: <20}{: <20}{: <20}{: <20}{: <20}{: <20}{: <20}'\
-              .format("time", "resid", "resname",
+              .format("time", "resid", "resname", "molparts",
                       "Etot", "VdWSR", "CoulSR", "VdW14", "Coul14", "VdWtot", "Coultot", ),
               file=energyoutput)
 
@@ -763,9 +782,18 @@ def write_selfinteractionfile(energy):
                     if '@ s' in energyline:
                         ### time is at row 0 ! ###
                         row         = int(energyline_cols[1][1:]) + 1
-                        host        = energyline_cols[3].split("resid_")[1][:-1]
-                        energytype  = energyline_cols[3].split(":")[0][1:]
-                        res_to_row.update( { (energytype, host):row } )
+
+                        if energy.part == "complete" or energy.ff.is_sterol(resname): 
+                            host        = energyline_cols[3].split("resid_")[1][:-1]
+                            energytype  = energyline_cols[3].split(":")[0][1:]
+                            part = "w_w"
+                        elif energy.part == "head-tail": 
+                            host        = energyline_cols[3].split("resid_")[1][2:-1]
+                            energytype  = energyline_cols[3].split(":")[0][1:]
+                            ident = energyline_cols[3].split("resid_")
+                            p1, p2 = ident[1][0], ident[2][0]
+                            part = "{}_{}".format(p1, p2)
+                        res_to_row.update( { (energytype, part, int(host)):row } )
 
                     ### pick correct energies from energyfile and print ###
                     elif '@' not in energyline and '#' not in energyline:
@@ -773,23 +801,28 @@ def write_selfinteractionfile(energy):
                         if time % energy.dt != 0:
                             continue
 
-                        try:
-                            vdw_sr   = energyline_cols[res_to_row[('LJ-SR', str(host))]]
-                            vdw_14   = energyline_cols[res_to_row[('LJ-14', str(host))]]
-                            coul_sr  = energyline_cols[res_to_row[('Coul-SR', str(host))]]
-                            coul_14  = energyline_cols[res_to_row[('Coul-14', str(host))]]
-                            vdw_tot  = float(vdw_14) + float(vdw_sr)
-                            coul_tot = float(coul_14) + float(coul_sr)
-                        except KeyError:
-                            continue
+                        for part in molparts:
+                            try:
+                                vdw_sr   = energyline_cols[res_to_row[('LJ-SR',   part, resid )]]
+                                vdw_14   = energyline_cols[res_to_row[('LJ-14',   part, resid )]]
+                                coul_sr  = energyline_cols[res_to_row[('Coul-SR', part, resid )]]
+                                coul_14  = energyline_cols[res_to_row[('Coul-14', part, resid )]]
+                                vdw_tot  = float(vdw_14) + float(vdw_sr)
+                                coul_tot = float(coul_14) + float(coul_sr)
+                            except KeyError:
+                                continue
 
-                        Etot = float(vdw_sr) + float(coul_sr) + float(vdw_14) + float(coul_14)
-                        print(
-                              '{: <10}{: <10}{: <10}{: <20.5f}'
-                              '{: <20}{: <20}{: <20}{: <20}{: <20.5f}{: <20.5f}'
-                              .format(time, resid, resname, Etot,
-                                      vdw_sr, coul_sr, vdw_14, coul_14, vdw_tot, coul_tot,),
-                              file=energyoutput)
+                            if not part:
+                                part = "w_w"
+
+                            Etot = float(vdw_sr) + float(coul_sr) + float(vdw_14) + float(coul_14)
+                            print(
+                                  '{: <10}{: <10}{: <10}{: <10}{: <20.5f}'
+                                  '{: <20}{: <20}{: <20}{: <20}{: <20.5f}{: <20.5f}'
+                                  .format(time, resid, resname, part, Etot,
+                                          vdw_sr, coul_sr, vdw_14, coul_14, vdw_tot, coul_tot,),
+                                  file=energyoutput)
+
 
 def check_exist_xvgs(energy,
                      check_len=False,
@@ -950,17 +983,17 @@ def write_energyfile(energy):
                                     for parthost in energy.molparts:
 
                                         ### remove "resid_" from parthost string ###
-                                        parthost_short = parthost[7:]
+                                        parthost_short = parthost.replace("resid_", "")
                                         if parthost_short == '':
                                             parthost_short = "w"
 
                                         for partneib in energy.molparts:
 
-                                            partneib_short = parthost[7:]
+                                            partneib_short = partneib.replace("resid_", "")
                                             if partneib_short == '':
                                                 partneib_short = "w"
 
-                                            inter = "{}_{}".format(parthost_short, partneib_short)
+                                            inter = "{}_{}".format(parthost_short.replace("_", ""), partneib_short.replace("_", ""))
                                             key_LJ = ('LJ', parthost+str(resid), partneib+str(neib) )
                                             key_C  = ('Coul', parthost+str(resid), partneib+str(neib) )
                                             rowindex_LJ = res_to_rowindex[ key_LJ ]
@@ -986,13 +1019,13 @@ def write_energyfile(energy):
                                     for parthost in energy.molparts:
 
                                         ### remove "resid_" from parthost string ###
-                                        parthost_short = parthost[7:]
+                                        parthost_short = parthost.replace("resid_", "")
                                         if parthost_short == '':
                                             parthost_short = "w"
                                         partneib       = "resid_"
                                         partneib_short = "w"
 
-                                        inter = "{}_{}".format(parthost_short, partneib_short)
+                                        inter = "{}_{}".format(parthost_short.replace("_", ""), partneib_short.replace("_", ""))
                                         key_LJ = ('LJ', parthost+str(resid), partneib+str(neib) )
                                         key_C  = ('Coul', parthost+str(resid), partneib+str(neib) )
                                         rowindex_LJ = res_to_rowindex[ key_LJ ]
@@ -1020,11 +1053,11 @@ def write_energyfile(energy):
 
                                     for partneib in energy.molparts:
 
-                                        partneib_short = parthost[7:]
+                                        partneib_short = partneib.replace("resid_", "")
                                         if partneib_short == '':
                                             partneib_short = "w"
 
-                                        inter = "{}_{}".format(parthost_short, partneib_short)
+                                        inter = "{}_{}".format(parthost_short.replace("_", ""), partneib_short.replace("_", ""))
                                         key_LJ = ('LJ', parthost+str(resid), partneib+str(neib) )
                                         key_C  = ('Coul', parthost+str(resid), partneib+str(neib) )
                                         rowindex_LJ = res_to_rowindex[ key_LJ ]
@@ -1057,7 +1090,7 @@ def write_energyfile(energy):
                                     rowindex_LJ = res_to_rowindex[ key_LJ ]
                                     rowindex_C  = res_to_rowindex[ key_C ]
 
-                                    inter = "{}_{}".format(parthost_short, partneib_short)
+                                    inter = "{}_{}".format(parthost_short.replace("_", ""), partneib_short.replace("_", ""))
 
                                     # Get energies from dict energyline_cols
                                     try:
@@ -1156,12 +1189,12 @@ def create_indexfile(sysinfo, resindex_filename="resindex_all.ndx"):
                     tailatoms = [i for j in sysinfo.ff.tail_atoms_of(resname) for i in j]
                     tailatoms_str = ' '.join( tailatoms )
                     headatoms_str = ' '.join( sysinfo.ff.head_atoms_of(resname) )
-                    selectionlist += ['resid_{0}_h=resid {0} and resname {1} and name {2};\n'\
+                    selectionlist += ['resid_h_{0}=resid {0} and resname {1} and name {2};\n'\
                                     .format(str(mol), resname, headatoms_str)]
-                    selectionlist += ['resid_{0}_t=resid {0} and resname {1} and name {2};\n'\
+                    selectionlist += ['resid_t_{0}=resid {0} and resname {1} and name {2};\n'\
                                     .format(str(mol), resname, tailatoms_str)]
-                    selectionlist += ['resid_{}_h;\n'.format(str(mol)) ]
-                    selectionlist += ['resid_{}_t;\n'.format(str(mol)) ]
+                    selectionlist += ['resid_h_{};\n'.format(str(mol)) ]
+                    selectionlist += ['resid_t_{};\n'.format(str(mol)) ]
 
                 selectionlist += ['resid_{};\n'.format(str(mol))]
                 selectionlist = ''.join( selectionlist )
