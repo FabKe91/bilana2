@@ -107,6 +107,8 @@ def create_cc_orderfiles(sysinfo,
 
                 if new_axis is not None:
                     new_axis_at_t = new_axis[leaflet]
+                else:
+                    new_axis_at_t = np.array([0,0,1])
 
                 order_val, s_prof = get_cc_order(atomslist.positions, ref_axis=new_axis_at_t)
 
