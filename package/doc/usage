@@ -2,19 +2,22 @@ Preparation:
 
 Following parameters must be given in the input file:
 
-        #system info
-        system: dppc_chol20
-        lipidmolecules: DPPC,CHL1
-        temperature: 290
-        timeframe: 0,900000000,1000
-
-        cutoff: 1.0
-        forcefield: charmm36
-
-        refatomselection: (resname DPPC DUPC and name P) or (resname CHL1 and name O3) or (resname CHIM and name C20)
-
-        # absolute path to mdfiles
-        mdfiles: /scratch/f_kell07/mdfiles
+    #System info
+    system: deffnm_of_system
+    lipidmolecules: lipid1,lipid2,lipid3,... # lipid types in bilayer
+    temperature: 300 #K simulation temperature
+    timeframe: 50000,20000000,1000 # analyzed time range (start, end, step)
+    
+    
+    cutoff: 1.0 # Cutoff for nearest neighbors
+    forcefield: charmm  # right now only charmm and martini are implemented (see folder definitions/
+    refatomselection: (resname DYPC YOPC POPC YOPS POPS DYPS and name P) or (resname ERG and name O3) # reference selection for neighbor selection (example here)
+    
+    protein_sequences: ANVGAIVGGVVGGVVGAVAIALCILLIVRHIN,ANVGAIVGGVVGGVVGAVAIALCILLIVRHIN # proteins in bilayer with sequence
+    
+    
+    # absolute path to mdfiles
+    mdfiles: /path/to/my/mdfiles
 
 The mdfiles path stores all required Gromacs MD files in the following manner:
 
