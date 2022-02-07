@@ -154,6 +154,7 @@ class Protein():
             bend_filename="local_bend.xvg",
             twist_filename="unit_twist.xvg",
             fitted_tilt_filename="fit_tilt.xvg",
+            fitted_tilt_vector_filename="fit_tilt_vector.xvg",
             ref_axis=None,
             ):
         origin_pdbfile   = origin_pdbfile.replace(".pdb", str(self.id)+".pdb")
@@ -164,6 +165,7 @@ class Protein():
         bend_filename    = bend_filename.replace(".xvg", str(self.id)+".xvg")
         twist_filename   = twist_filename.replace(".xvg", str(self.id)+".xvg")
         fitted_tilt_filename = fitted_tilt_filename.replace(".xvg", str(self.id)+".xvg")
+        fitted_tilt_vector_filename    = fitted_tilt_vector_filename.replace(".xvg", str(self.id)+".xvg")
 
         path_to_analysis_files = "{}helanal/".format(outputfilepath)
         os.makedirs(path_to_analysis_files, exist_ok=True)
@@ -180,6 +182,7 @@ class Protein():
             bend_filename=bend_filename,
             twist_filename=twist_filename,
             fitted_tilt_filename=fitted_tilt_filename,
+            fitted_tilt_vector_filename=fitted_tilt_vector_filename,
             ref_axis=ref_axis,
             prefix=prefix,
             )
@@ -224,21 +227,22 @@ class Protein():
 
 
 def create_protein_neighborfile(systeminfo,
-    rcut=14,
+    cutoff=4,
     outputfilename="protein_neighbors.dat",
     overwrite=False):
     '''
-        rcut is in Angstrom!
+        cutoff is in Angstrom!
         Calculate neighborhood of protein:
             protid   time     Number_of_neighbors      List_of_Neighbors
     '''
 
-    refatoms = systeminfo.reference_atomselection 
+    #refatoms = systeminfo.reference_atomselection 
+    #lipid_resnames = systeminfo.pl_resnames + systeminfo.sterol_resnames
+    #PL_refatomnames   = ' '.join([systeminfo.ff.central_atom_of(resname) \
+    #    for resname in lipid_resnames])
+    #prot_refatomnames = systeminfo.ff.central_atom_of("protein")
 
-    lipid_resnames = systeminfo.pl_resnames + systeminfo.sterol_resnames
-    PL_refatomnames   = ' '.join([systeminfo.ff.central_atom_of(resname) \
-        for resname in lipid_resnames])
-    prot_refatomnames = systeminfo.ff.central_atom_of("protein")
+    lipids = systeminfo.universe.atoms.select_atoms("resname {}".format(' '.join(systeminfo.molecules)))
 
     if not overwrite and os.path.isfile(outputfilename):
         LOGGER.info("File {} exists, will not overwrite".format(outputfilename))
@@ -246,68 +250,64 @@ def create_protein_neighborfile(systeminfo,
 
     with open(outputfilename, "w") as outf:
         print("{: <20}{: <20}{: <20}{: <20}{: <20}{: <20}".format("protid", "resid", "time", "leaflet", "Number_of_neighbors", "List_of_Neighbors"), file=outf)
-        for protein in systeminfo.proteins:
-            protid = protein.id
+        for prot in systeminfo.proteins:
+            protid = prot.id
             LOGGER.info("At protein %s", protid)
 
-            traj_len = len(systeminfo.universe.trajectory)
+            #refatomgrp = systeminfo.universe.select_atoms(refatoms)
+            #refpositions = get_ref_positions(systeminfo, "atom", refatomgrp) # leaflets=[(resid1, pos1), ...]
 
-            for t in range(traj_len):
-                time = systeminfo.universe.trajectory[t].time
+            for ts in systeminfo.universe.trajectory:
+                time = ts.time
+                box = ts.dimensions
+
                 if not systeminfo.within_timerange(time):
                     continue
                 LOGGER.info("At time %s", time)
 
-                refatomgrp = systeminfo.universe.select_atoms(refatoms)
-                refpositions = get_ref_positions(systeminfo, "atom", refatomgrp) # leaflets=[(resid1, pos1), ...]
+                #LOGGER.debug("Found %s atoms: %s ", len(refatomgrp.atoms), refatomgrp.atoms)
+                #LOGGER.debug("Dimension of leaflets %s", np.array(refpositions).shape)
 
-                LOGGER.debug("Found %s atoms: %s ", len(refatomgrp.atoms), refatomgrp.atoms)
-                LOGGER.debug("Dimension of leaflets %s", np.array(refpositions).shape)
+                dist_ar = distance_array(prot.residues.atoms.positions, lipids.atoms.positions, box=box)
 
-                position_array   =  np.array([pos for resid, pos in refpositions])
-                position_array2d =  position_array.copy()
-                position_array2d[:,2] = 0
+                ### Get all lipids within CUTOFF for each res
+                ndxa = 0
+                for i, res in enumerate(prot.residues):
 
-                for refatm in protein.reference_atoms:
+                    leaflet  = prot.resid_to_leaflet[res.resid]
 
-                    host_pos = refatm.positions[0]
-                    host_pos2d = host_pos.copy()
-                    host_pos2d[2] = 0
-                    hostid = refatm.resids[0]
+                    ndxb = ndxa + len(res.atoms)
 
-                    dist_array = mda.lib.distances.distance_array(
-                        host_pos,
-                        position_array,
-                        box=systeminfo.universe.dimensions)[0]
-                    dist_array2d = mda.lib.distances.distance_array(
-                        host_pos2d,
-                        position_array2d,
-                        box=systeminfo.universe.dimensions)[0]
+                    #print("from", ndxa, ndxb, dist_ar.shape)
 
-                    leaflet = protein.resid_to_leaflet[hostid]
+                    atoms_in_range = []
+                    for ar in dist_ar[ndxa:ndxb]:
+                        atoms_in_range.append(lipids.atoms[ar <= cutoff])
+                    lipids_in_range = np.sum(atoms_in_range)
+                    if not isinstance(lipids_in_range, float):
+                        lipids_in_range = lipids_in_range.residues
+                    else:
+                        lipids_in_range = atoms_in_range[0].residues
 
-                    #neibresidues = systeminfo.universe.atoms.select_atoms(
-                    #        "name {} and around {} (name {} and resid {})"\
-                    #        .format(PL_refatomnames, rcut, prot_refatomnames, resid)).residues
+                    ndxa += len(res.atoms)
 
-                    neiblist = []
-                    for resndx, distance in enumerate(dist_array):
-                        neibid = refpositions[resndx][0]
-                        neib_leaf = systeminfo.convert.resid_to_leaflet[neibid]
+                    ### Count lipid types per res
+                    #resn_count = []
+                    #for mol in systeminfo.molecules:
+                    #    resn_count.append(list(lipids_in_range.resnames).count(mol))
+                    #resn_count = np.array(resn_count, dtype=int)
 
-                        if leaflet == neib_leaf:
-                            distance2d = dist_array2d[resndx]
-                            if distance2d <= rcut:
-                                neiblist.append( neibid )
+                    ### Create a neiblist 
+                    neiblist = [str(resid) for resid in lipids_in_range.resids]
+                    #        if systeminfo.convert.resid_to_leaflet[resid] == leaflet]
 
-                    neiblist = list(set(neiblist)) # delete duplicates
                     neiblist.sort()
-                    neiblist = [ str(n) for n in neiblist if n != hostid ] # delete host entry
                     n_neibs = len(neiblist)
                     neiblist = ','.join( neiblist )
-                    LOGGER.debug("Neiblist: %s", neiblist)
+                    #LOGGER.debug("Neiblist: %s", neiblist)
+                    LOGGER.debug("id %s | resid %s | time %s | leaf %s | Ntot %s | list %s", protid, res.resid, time, leaflet, n_neibs, neiblist)
 
-                    print("{: <20}{: <20}{: <20}{: <20}{: <20}{: <20}".format(protid, hostid, time, leaflet, n_neibs, neiblist), file=outf)
+                    print("{: <20}{: <20}{: <20}{: <20}{: <20}{: <20}".format(protid, res.resid, time, leaflet, n_neibs, neiblist), file=outf)
 
 
 
@@ -350,6 +350,8 @@ def calculate_crossing_angle(systeminfo, protein1, protein2,
     end = systeminfo.t_end
     dt = systeminfo.dt
 
+    ### Define selection for begin and end parts of the TMDs ###
+    ### The COG is used as reference pos for selection       ###
     sel_b_k = protein1.residues[0:4].atoms.select_atoms(sel)
     sel_b_j = protein2.residues[0:4].atoms.select_atoms(sel)
 
@@ -376,15 +378,18 @@ def calculate_crossing_angle(systeminfo, protein1, protein2,
         b_k, e_k = sel_b_k.center_of_geometry(), sel_e_k.center_of_geometry()
         b_j, e_j = sel_b_j.center_of_geometry(), sel_e_j.center_of_geometry()
 
+        ### t_j-t_k defines the contact vector ###
         t_k, t_j = minimal_distance(b_k,e_k,b_j,e_j)
 
         crossing_angle = mda.lib.distances.calc_dihedrals(b_k, t_k, t_j, b_j, box=box) * (180/np.pi)
 
+        ### Shift angles accordingly ###
         if crossing_angle > 90:
             crossing_angle = crossing_angle - 90
         if crossing_angle < -90:
             crossing_angle = crossing_angle + 90
         
+        #### Why this correction? ####
         dist_com_uncorrected = distance_array(protein1.residues.atoms.center_of_geometry(), protein2.residues.atoms.center_of_geometry())[0][0]
 
         diffvector1 = np.subtract(b_k,e_k)
@@ -399,24 +404,29 @@ def calculate_crossing_angle(systeminfo, protein1, protein2,
             if s != 0:
                 crossing_angle = np.abs(tmd_angle)*s
 
+        ### Append data for this timeframe ###
         data = data.append(pd.DataFrame({'time': time, 'crossing_angle': crossing_angle}, index=[i_ts]), ignore_index=False)        
             
     data.to_csv(outputfilename, index=False)
 
 
 def minimal_distance(begA, endA, begB, endB):
-
+    ''' 
+        Minimal distance of two lines (here the vectors spanned by TMD ends)
+        is calculated as the distance between parallel planes of the two lines
+    '''
+    ### Calculate determinant of vectors Aa-Ae=A and Ba-Be=B
     W1 = np.dot((begA - begB), (endA - begA))
     W2 = np.dot((begA - begB), (endB - begB))
     U11 = (np.linalg.norm(endA - begA)) ** 2
     U12 = np.dot((endA - begA), (endB - begB))
     U22 = (np.linalg.norm(endB - begB)) ** 2
-    Det = np.dot(U11, U22) - np.dot(U12, U12)
+    Det = np.dot(U11, U22) - np.dot(U12, U12) # The determinant is the area spanned by AxB
     
     if Det == 0:
-
         SA = 0.5
         SB = 0.5
+
     else:
         SA = (np.dot(W2, U12) - np.dot(W1, U22)) / Det
         SB = (np.dot(W2, U11) - np.dot(W1, U12)) / Det
