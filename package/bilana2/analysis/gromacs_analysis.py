@@ -1,5 +1,6 @@
 import os
 import logging
+import pandas as pd 
 
 from ..lib.gromacswrapper import exec_gromacs, GMXNAME, write_log
 
@@ -55,7 +56,7 @@ def calc_density(systeminfo, selstr, outname="density.xvg", overwrite=False, **k
 
 def calc_rdf(systeminfo, ref, sel,
     seltype='atom', selrpos='atom', 
-    binsize=0.002, protein=None, name_suffix="",
+    binsize=0.002, protein=None, name_suffix="", ster_assign_f="sterol_leafletassignment.dat",
     **kw_rdf):
     ''' Calculates 2D RDF of sel relative to ref only for one specific leaflet
         leaflet_assignment.dat (created in leaflets.py) is needed
@@ -93,11 +94,31 @@ def calc_rdf(systeminfo, ref, sel,
             end = str(val)
         else:
             additional_commands += ["-"+key, str(val)]
+    if begin is None:
+        begin = str(systeminfo.t_start)
+    if end is None: 
+        end = str(systeminfo.t_end)
 
-    for leafndx, reslist in enumerate(systeminfo.convert.leaflet_to_resids):
+    ### Load dynamic sterol assignment ###
+    if ster_assign_f is not None:
+        dat = pd.read_table(ster_assign_f, sep="\s+").sort_values(["time", "resid"])
+        begintime = dat.time.iloc[dat.time.searchsorted(float(begin))]
+        dat = dat[ dat.time == begintime ]
+        leaflet_sterol_assignment = dat.groupby("leaflet").resid.agg(lambda x: sorted(list(set(x)))).to_dict()
+        del dat
+    else:
+        leaflet_sterol_assignment = systeminfo.convert.leaflet_to_resids
 
-        ### Create temporary fies containing the selection string for -ref and -sel flag ###
-        resid_list_str = 'resid ' + ' '.join([str(i) for i in reslist])
+    pl_reslist = systeminfo.pl_resids
+    ster_reslist = systeminfo.sterol_resids
+
+    #for leafndx, reslist in enumerate(systeminfo.convert.leaflet_to_resids):
+    for leafndx in [0, 1]:
+
+
+        pls_in_leaflet  = 'resid ' + ' '.join([str(i) for i in pl_reslist if systeminfo.convert.resid_to_leaflet[i] == leafndx])
+        ster_in_leaflet = 'resid ' + ' '.join([str(i) for i in ster_reslist if i in leaflet_sterol_assignment[leafndx]]) 
+        resid_list_str = pls_in_leaflet + " " + ster_in_leaflet.replace("resid","")
         
         pl_in_leaf = True
 
@@ -133,8 +154,9 @@ def calc_rdf(systeminfo, ref, sel,
                         LOGGER.debug("Protein residlist %s", prot_residlist_str)
                         selectstring = '{} and {}'.format(selection[1], prot_residlist_str)
                     elif selection[0] == "sel":
+                        ### ADD STEROL LEAFLET ASSIGNMENT HERE
                         selectstring = '{} and {}'.format(selection[1], resid_list_str)
-                        print([lip for lip in systeminfo.universe.atoms.select_atoms(selection[1]) if systeminfo.convert.resid_to_leaflet[lip.residue.resid] == leafndx ])
+                        #print([lip for lip in systeminfo.universe.atoms.select_atoms(selection[1]) if systeminfo.convert.resid_to_leaflet[lip.residue.resid] == leafndx ])
 
                         if not [lip for lip in systeminfo.universe.atoms.select_atoms(selection[1]) if systeminfo.convert.resid_to_leaflet[lip.residue.resid] == leafndx ]:
                             pl_in_leaf = False
@@ -142,6 +164,7 @@ def calc_rdf(systeminfo, ref, sel,
             ### if both ref and sel are lipids
             else:
                 selectstring = '{} and {}'.format(selection[1], resid_list_str)
+                ### ADD STEROL LEAFLET ASSIGNMENT HERE
                 print([lip for lip in systeminfo.universe.atoms.select_atoms(selection[1]) if systeminfo.convert.resid_to_leaflet[lip.residue.resid] == leafndx ])
 
                 if not [lip for lip in systeminfo.universe.atoms.select_atoms(selection[1]) if systeminfo.convert.resid_to_leaflet[lip.residue.resid] == leafndx ]:
@@ -170,10 +193,6 @@ def calc_rdf(systeminfo, ref, sel,
                                                    .replace(" ", "").replace("\"", "")
 
         ### Run gromacs command ###
-        if begin is None:
-            begin = str(systeminfo.t_start)
-        if end is None: 
-            end = str(systeminfo.t_end)
         cmd = [
             '-xy', '-xvg', 'none',
             '-f', systeminfo.path.trj, '-s', systeminfo.path.tpr,
