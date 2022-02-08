@@ -27,8 +27,8 @@
 # be sure everything was properly added
 # =====================================================
 
-TAILS             = ['DP', 'DI', 'DU']
-HEADS             = ['PC']
+TAILS             = ['DP', 'DI', 'DU', 'PO', 'DO']
+HEADS             = ['PC', 'PS']
 STEROLS           = ['CHL1', 'ERG']
 PROTEIN_SEQUENCES = []
 AMINO_ACIDS       = ['VAL', 'GLY', 'ALA', 'ILE', 'LEU', 'CYS', 'ARG', 'HSD']
@@ -48,6 +48,7 @@ GLYCEROLATOMS = ['GL1', 'GL2', ]
 
 HEAD_ATOMS_OF = {
     'PC':['PO4', 'NC3'],
+    'PS':['PO4', 'CNO'],
     'CHOL':['ROH', 'R1', 'R2', 'R3', 'R4', 'R5'],
     'ERG':['ROH', 'R1', 'R2', 'R3', 'R4', 'R5'],
     }
@@ -57,12 +58,16 @@ HEAD_ATOMS_OF = {
 # =================================================
 
 TAILCARBONS = {
-    'DP':[['C1A', 'C2A', 'C3A', 'C4A'],                 #16:0  ### This length should be a range as martini cannot distinguish between particular lengths
-          ['C1B', 'C2B', 'C3B', 'C4B']],                #16:0  ### This length should be a range as martini cannot distinguish between particular lengths
-    'DI':[['C1A', 'D2A', 'D3A', 'C4A'],                 #14:0  ### This length should be a range as martini cannot distinguish between particular lengths
-          ['C1B', 'D2B', 'D3B', 'C4B']],                #14:0  ### This length should be a range as martini cannot distinguish between particular lengths
-    'DU':[['C1A', 'D2A', 'D3A', 'C4A'],                 #14:0  ### This length should be a range as martini cannot distinguish between particular lengths
-          ['C1B', 'D2B', 'D3B', 'C4B']],                #14:0  ### This length should be a range as martini cannot distinguish between particular lengths
+    'DP':[['C1A', 'C2A', 'C3A', 'C4A'],                 #16:0  
+          ['C1B', 'C2B', 'C3B', 'C4B']],                #16:0  
+    'PO':[['C1A', 'D2A', 'C3A', 'C4A'],                 #16:1  
+          ['C1B', 'C2B', 'C3B', 'C4B']],                #16:0  
+    'DO':[['C1A', 'D2A', 'C3A', 'C4A'],                 #16:1  
+          ['C1B', 'D2B', 'C3B', 'C4B']],                #16:1  
+    'DI':[['C1A', 'D2A', 'D3A', 'C4A'],                 #14:0  
+          ['C1B', 'D2B', 'D3B', 'C4B']],                #14:0  
+    'DU':[['C1A', 'D2A', 'D3A', 'C4A'],                 #14:0  
+          ['C1B', 'D2B', 'D3B', 'C4B']],                #14:0  
     'CHL1':[['C1', 'C2']],
     'ERG':[['C1', 'C2']],
     }
@@ -93,4 +98,37 @@ CENTRAL_ATOM_OF = {
 # Protein specific definitions
 # ====================================================
 
-RESNAME_SEQUENCE_OF_PROTEIN = {}
+AMINO_ACIDS = ["ALA", "ARG", "ASN", "ASP", "ASX", "CYS", "GLU", "GLN", "GLX", "GLY", "HSD",
+      "ILE", "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "TRP", "TYR", "VAL",
+      "PROT", "AA", "protein"
+]
+
+AA_BACKBONE = ['BB']
+
+AA_SIDECHAINS = {
+            "ALA":None,
+            "ARG":None,
+            "ASN":None,
+            "ASP":None,
+            "ASX":None,
+            "CYS":None,
+            "GLU":None,
+            "GLN":None,
+            "GLX":None,
+            "GLY":None,
+            "HSD":None,
+            "ILE":None,
+            "LEU":None,
+            "LYS":None,
+            "MET":None,
+            "PHE":None,
+            "PRO":None,
+            "SER":None,
+            "THR":None,
+            "TRP":None,
+            "TYR":None,
+            "VAL":None,
+}
+
+
+
