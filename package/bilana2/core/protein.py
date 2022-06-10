@@ -281,13 +281,15 @@ def create_protein_neighborfile(systeminfo,
                     #print("from", ndxa, ndxb, dist_ar.shape)
 
                     atoms_in_range = []
-                    for ar in dist_ar[ndxa:ndxb]:
+                    for ar in dist_ar[ndxa:ndxb]: # Loop over each atom in residue <res>
                         atoms_in_range.append(lipids.atoms[ar <= cutoff])
-                    lipids_in_range = np.sum(atoms_in_range)
-                    if not isinstance(lipids_in_range, float):
-                        lipids_in_range = lipids_in_range.residues
+                    lipids_in_range = np.sum(atoms_in_range) # returns 0.0 if atom groups are empty
+                    if isinstance(lipids_in_range, mda.core.groups.Atom):
+                        lipids_in_range = mda.ResidueGroup([lipids_in_range.residue]) # Returns ResidueGroup with 1 residue
+                    elif not isinstance(lipids_in_range, float):
+                        lipids_in_range = lipids_in_range.residues # This should be the normal case
                     else:
-                        lipids_in_range = atoms_in_range[0].residues
+                        lipids_in_range = atoms_in_range[0].residues # Returns ResidueGroup with 0 residues
 
                     ndxa += len(res.atoms)
 
